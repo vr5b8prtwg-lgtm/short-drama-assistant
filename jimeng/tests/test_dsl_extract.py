@@ -1,0 +1,81 @@
+# -*- coding: utf-8 -*-
+"""DSL 联动测试：执行 dify/网剧自动生成.yml 中嵌的 video_pack / build_package 代码。"""
+from pathlib import Path
+import sys
+
+import yaml
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+DSL = Path(__file__).resolve().parents[2] / "dify" / "网剧自动生成.yml"
+
+
+def _node_code(node_id):
+    with open(DSL, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    nodes = {n["id"]: n["data"] for n in data["workflow"]["graph"]["nodes"]}
+    return nodes[node_id]["code"]
+
+
+def _exec(code):
+    ns = {}
+    exec(code, ns)
+    return ns
+
+
+SAMPLE_SCRIPTS = """## 第1集：一针惊四座
+
+### 场景 1
+- 场景地点/时间：市医院大厅，白天
+- 人物：林川、赵德海
+- 剧情与动作：赵德海当众讥讽林川
+- 对白：
+  - 赵德海：送外卖的也配谈医？
+- 情绪：冲突
+- 画面提示词（文生视频）：中景、医院大厅；林川被讥讽；2D国漫风
+"""
+
+SAMPLE_OUTLINE = """## 人物卡
+- **林川**：身份——外卖员/隐世医传人；反差——人前卑微隐忍。
+- **定妆描述**：23 岁清俊青年，黑色碎发，深蓝外卖冲锋衣；气质隐忍内敛。
+- **沈晚晴**：身份——沈氏集团千金；反差——表面冷艳疏离。
+- **定妆描述**：26 岁冷艳千金，黑色长发及腰，米白风衣；气质清冷。
+"""
+
+
+def test_video_pack_adds_characters():
+    ns = _exec(_node_code("video_pack"))
+    out = ns["main"](SAMPLE_SCRIPTS)["video_pack"]
+    assert "出场角色：林川、赵德海" in out
+    assert "画面提示词：中景、医院大厅；林川被讥讽；2D国漫风" in out
+    assert "对白/字幕：赵德海：送外卖的也配谈医？" in out
+
+
+def test_build_package_extracts_character_sheet():
+    ns = _exec(_node_code("build_package"))
+    pkg = ns["main"](
+        outline=SAMPLE_OUTLINE,
+        episode_plan="[{\"number\":1}]",
+        all_scripts=SAMPLE_SCRIPTS,
+        video_pack="# 文生视频提示词包",
+        qa_report="# 质检报告",
+        trial_mode="否",
+    )["package"]
+    assert "## 人物定妆表（全剧固定外观锚点）" in pkg
+    assert "**林川**：23 岁清俊青年，黑色碎发，深蓝外卖冲锋衣；气质隐忍内敛。" in pkg
+    assert "**沈晚晴**：26 岁冷艳千金，黑色长发及腰，米白风衣；气质清冷。" in pkg
+
+
+if __name__ == "__main__":
+    import traceback
+    failed = 0
+    for name, fn in sorted(globals().items()):
+        if name.startswith("test_") and callable(fn):
+            try:
+                fn()
+                print("PASS", name)
+            except Exception:
+                failed += 1
+                print("FAIL", name)
+                traceback.print_exc()
+    sys.exit(1 if failed else 0)

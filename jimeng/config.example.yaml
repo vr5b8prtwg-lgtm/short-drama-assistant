@@ -1,0 +1,82 @@
+# ===== 即梦 dreamina CLI 全自动 AI 漫剧管线配置示例 =====
+# 使用方式：复制本文件为 config.yaml 后按需修改；也可用环境变量覆盖关键项。
+# 复制命令（在项目根目录）：
+#   PowerShell:  Copy-Item jimeng/config.example.yaml jimeng/config.yaml
+#   Git Bash:    cp jimeng/config.example.yaml jimeng/config.yaml
+
+dreamina:
+  # dreamina 可执行文件完整路径；留空则自动查找 PATH / ~/.local/bin / ~/bin
+  bin: ""
+  # 生成命令提交后的轮询秒数；0 表示不轮询（随后用 query_result 跟踪）
+  poll_seconds: 30
+  # 手动轮询间隔（秒）
+  poll_interval: 10
+  # 单个任务最大等待时间（秒）
+  max_wait_seconds: 900
+
+style:
+  # 全局画面风格前缀，固定为 2D 国漫/日漫、竖屏 9:16
+  prefix: "2D国漫/日漫风格，精致线稿，电影感光影，高完成度，无文字水印"
+  # 定妆图背景与姿态后缀
+  character_bg: "纯色浅灰背景，全身立绘，正面站立，单人，无文字"
+
+image:
+  ratio: "9:16"
+  resolution_type: "2k"
+  model_version: "4.0"
+  # 生成场景图时是否优先用 image2image 带定妆图做参考（失败自动退回 text2image）
+  use_character_reference: true
+
+video:
+  # image2video（每场景单段） | multiframe2video（每集多图连贯一段）
+  mode: "image2video"
+  duration: 5
+  video_resolution: "1080p"
+  model_version: "seedance2.0"
+  # 图生视频的运动/运镜提示词（可含 {action} 占位符，替换为场景动作）
+  motion_prompt: "镜头缓慢推近，人物自然动作，电影感运镜，画面稳定"
+
+tts:
+  # 是否启用配音；未配置 api_key 时会自动跳过配音
+  enabled: true
+  # 火山引擎豆包语音 API Key（新版控制台 API Key 方案）
+  # 获取：https://console.volcengine.com/speech/new/setting/apikeys
+  # 也可用环境变量 VOLC_TTS_API_KEY 覆盖
+  api_key: ""
+  endpoint: "https://openspeech.bytedance.com/api/v3/tts/unidirectional/sse"
+  resource_id: "seed-tts-2.0"
+  format: "mp3"
+  sample_rate: 24000
+  speech_rate: 0
+  loudness_rate: 0
+  bit_rate: 64000
+  # 默认音色（未在 voices 中配置的角色使用）
+  default_voice: "zh_female_vv_uranus_bigtts"
+  # 角色名 -> 豆包音色 ID（按剧本人物卡的角色名配置）
+  voices:
+    旁白: "zh_male_wanwanxiaohe_bigtts"
+
+subtitle:
+  # 无法从音频测出时长时，每句字幕的默认时长（秒）
+  default_line_seconds: 2.5
+  # 相邻字幕间隔（秒）
+  gap_seconds: 0.2
+
+assemble:
+  ffmpeg_bin: "ffmpeg"
+  # soft=封装字幕（播放器可切换） | burn=烧录进画面
+  subtitle_mode: "soft"
+
+paths:
+  # 所有产物根目录（相对项目根；建议加入 .gitignore）
+  assets_root: "assets"
+  characters_dir: "assets/characters"
+  scenes_dir: "assets/scenes"
+  clips_dir: "assets/clips"
+  audio_dir: "assets/audio"
+  subs_dir: "assets/subs"
+  episodes_dir: "assets/episodes"
+  logs_dir: "assets/logs"
+
+# 运行前检查积分；低于该值则拒绝执行（0 表示不检查）
+min_credit: 0

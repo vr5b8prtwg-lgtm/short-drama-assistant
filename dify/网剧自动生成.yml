@@ -1,6 +1,5 @@
 app:
-  description: 分阶段确认式网剧（短剧）剧本生成：创意 -> 大纲与人物 -> 确认 -> 分集剧本 -> 质检。内置试跑模式，仅生成第 1 集、约
-    15 秒。
+  description: 分阶段确认式网剧（短剧）剧本生成：创意 -> 大纲与人物 -> 确认 -> 分集剧本 -> 质检。内置试跑模式，仅生成第 1 集、约 15 秒。
   icon: 🎬
   icon_background: '#E0F2FE'
   icon_type: emoji
@@ -8,11 +7,11 @@ app:
   name: 网剧自动生成
   use_icon_as_answer_icon: false
 dependencies:
-- current_identifier: null
+- current_identifier:
   type: marketplace
   value:
     marketplace_plugin_unique_identifier: langgenius/tongyi:0.2.8@4805b0ea347d2b0b40352afb28e99f441710aa63747d5374fe823576244f788c
-    version: null
+    version:
 kind: app
 version: 0.7.0
 workflow:
@@ -52,8 +51,7 @@ workflow:
   environment_variables: []
   features:
     file_upload: {}
-    opening_statement: 你好，我是网剧自动生成助手。填写下方「创意描述」等参数后发送，我会先产出大纲与人物设定，你确认后再生成全部分集剧本与质检报告。也可以开启「试跑模式」只生成第
-      1 集（约 15 秒）。
+    opening_statement: 你好，我是网剧自动生成助手。填写下方「创意描述」等参数后发送，我会先产出大纲与人物设定，你确认后再生成全部分集剧本与质检报告。也可以开启「试跑模式」只生成第 1 集（约 15 秒）。
     retriever_resource:
       enabled: true
     sensitive_word_avoidance:
@@ -369,13 +367,13 @@ workflow:
         type: start
         variables:
         - label: 创意描述
-          max_length: null
+          max_length:
           options: []
           required: true
           type: paragraph
           variable: creative_prompt
         - label: 题材类型
-          max_length: null
+          max_length:
           options:
           - 都市逆袭
           - 古装权谋
@@ -402,7 +400,7 @@ workflow:
           type: number
           variable: words_per_episode
         - label: 试跑模式
-          max_length: null
+          max_length:
           options:
           - 否
           - 是
@@ -410,7 +408,7 @@ workflow:
           type: select
           variable: trial_mode
         - label: 爆款元素参考（可选）
-          max_length: null
+          max_length:
           options: []
           required: false
           type: text-input
@@ -429,41 +427,18 @@ workflow:
       type: custom
       width: 244
     - data:
-        code: "import re\n\nCN_NUM = {\"一\": 1, \"二\": 2, \"两\": 2, \"三\": 3, \"四\"\
-          : 4, \"五\": 5,\n          \"六\": 6, \"七\": 7, \"八\": 8, \"九\": 9}\n\n\n\
-          def _cn_to_int(s: str) -> int:\n    if s.isdigit():\n        return int(s)\n\
-          \    if s == \"十\":\n        return 10\n    total = 0\n    if s.startswith(\"\
-          十\"):\n        total = 10 + CN_NUM.get(s[1:], 0)\n        return total\n\
-          \    if \"十\" in s:\n        left, _, right = s.partition(\"十\")\n     \
-          \   return CN_NUM.get(left, 0) * 10 + CN_NUM.get(right, 0)\n    return CN_NUM.get(s,\
-          \ 0)\n\n\ndef main(query: str, draft_outline: str, confirmed_outline: str)\
-          \ -> dict:\n    q = (query or \"\").strip()\n    confirm_kw = [\"确认\", \"\
-          可以\", \"开始\", \"继续\", \"没问题\", \"同意\", \"通过\", \"ok\", \"好的\", \"行\", \"\
-          就这样\"]\n    revise_kw = [\"修改\", \"调整\", \"不要\", \"不行\", \"换成\", \"改成\"\
-          , \"改为\", \"重来\", \"重新\", \"再写\", \"换一个\", \"按这个改\"]\n    if not draft_outline\
-          \ and not confirmed_outline:\n        return {\"intent\": \"outline\", \"\
-          ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if confirmed_outline:\n\
-          \        m = re.search(r\"第\\s*([0-9一二三四五六七八九十两]+)\\s*集\", q)\n        if\
-          \ m and any(k in q for k in [\"重写\", \"修改\", \"改\", \"换\"]):\n         \
-          \   return {\"intent\": \"rewrite_ep\", \"ep_number\": _cn_to_int(m.group(1)),\n\
-          \                    \"rewrite_instruction\": q}\n        return {\"intent\"\
-          : \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if any(k\
-          \ in q.lower() for k in confirm_kw):\n        return {\"intent\": \"confirm\"\
-          , \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if any(k in q for\
-          \ k in revise_kw):\n        return {\"intent\": \"revise\", \"ep_number\"\
-          : 0, \"rewrite_instruction\": q}\n    return {\"intent\": \"help\", \"ep_number\"\
-          : 0, \"rewrite_instruction\": \"\"}\n"
+        code: "import re\n\nCN_NUM = {\"一\": 1, \"二\": 2, \"两\": 2, \"三\": 3, \"四\": 4, \"五\": 5,\n          \"六\": 6, \"七\": 7, \"八\": 8, \"九\": 9}\n\n\ndef _cn_to_int(s: str) -> int:\n    if s.isdigit():\n        return int(s)\n    if s == \"十\":\n        return 10\n    total = 0\n    if s.startswith(\"十\"):\n        total = 10 + CN_NUM.get(s[1:], 0)\n        return total\n    if \"十\" in s:\n        left, _, right = s.partition(\"十\")\n        return CN_NUM.get(left, 0) * 10 + CN_NUM.get(right, 0)\n    return CN_NUM.get(s, 0)\n\n\ndef main(query: str, draft_outline: str, confirmed_outline: str) -> dict:\n    q = (query or \"\").strip()\n    confirm_kw = [\"确认\", \"可以\", \"开始\", \"继续\", \"没问题\", \"同意\", \"通过\", \"ok\", \"好的\", \"行\", \"就这样\"]\n    revise_kw = [\"修改\", \"调整\", \"不要\", \"不行\", \"换成\", \"改成\", \"改为\", \"重来\", \"重新\", \"再写\", \"换一个\", \"按这个改\"]\n    if not draft_outline and not confirmed_outline:\n        return {\"intent\": \"outline\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if confirmed_outline:\n        m = re.search(r\"第\\s*([0-9一二三四五六七八九十两]+)\\s*集\", q)\n        if m and any(k in q for k in [\"重写\", \"修改\", \"改\", \"换\"]):\n            return {\"intent\": \"rewrite_ep\", \"ep_number\": _cn_to_int(m.group(1)),\n                    \"rewrite_instruction\": q}\n        return {\"intent\": \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if any(k in q.lower() for k in confirm_kw):\n        return {\"intent\": \"confirm\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if any(k in q for k in revise_kw):\n        return {\"intent\": \"revise\", \"ep_number\": 0, \"rewrite_instruction\": q}\n    return {\"intent\": \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n"
         code_language: python3
         desc: 根据会话状态与用户消息计算意图
         outputs:
           ep_number:
-            children: null
+            children:
             type: number
           intent:
-            children: null
+            children:
             type: string
           rewrite_instruction:
-            children: null
+            children:
             type: string
         selected: false
         title: 路由
@@ -594,43 +569,7 @@ workflow:
         - role: system
           text: 你是国内头部短剧公司的首席总编剧，擅长打造高留存、强钩子的竖屏短剧。铁律：开场即冲突；每 3 集一个爆点；集集有钩子；人设反差强烈；情绪优先；短句快节奏；不涉政、不涉黄赌毒、不抄袭真实人物与已有作品；全程使用简体中文。
         - role: user
-          text: '请根据以下创意与设定，产出这部网剧的「大纲与人物设定」。
-
-
-            创意描述：{{#start.creative_prompt#}}
-
-            题材类型：{{#start.genre#}}
-
-            目标集数：{{#start.episode_count#}}
-
-            爆款元素参考：{{#start.hot_elements#}}
-
-            试跑模式：{{#start.trial_mode#}}
-
-
-            正式模式（试跑=否）请按以下结构输出 Markdown：
-
-            1. 剧名（10 字内，有记忆点）
-
-            2. 一句话卖点（30 字内：谁+冲突+爽点）
-
-            3. 故事梗概（300-500 字：起因、发展、高潮、结局方向）
-
-            4. 人物卡（主角 2-4 个 + 关键配角）：名字/身份/性格/核心动机/反差点/与主角关系
-
-            5. 世界观（时代/地点/规则，100-200 字）
-
-            6. 爽点节奏（每 3-5 集一个爆点的情绪曲线规划）
-
-            7. 前 3 集要点（每集 2-3 句话）
-
-
-            试跑模式（试跑=是）请精简输出：剧名 + 一句话卖点 + 一段 100 字梗概 + 主角 2 个简卡（名字/身份/动机/反差）。
-
-
-            只输出正文，不要输出任何解释。
-
-            '
+          text: "请根据以下创意与设定，产出这部网剧的「大纲与人物设定」。\n\n创意描述：{{#start.creative_prompt#}}\n题材类型：{{#start.genre#}}\n目标集数：{{#start.episode_count#}}\n爆款元素参考：{{#start.hot_elements#}}\n试跑模式：{{#start.trial_mode#}}\n\n正式模式（试跑=否）请按以下结构输出 Markdown：\n1. 剧名（10 字内，有记忆点）\n2. 一句话卖点（30 字内：谁+冲突+爽点）\n3. 故事梗概（300-500 字：起因、发展、高潮、结局方向）\n4. 人物卡（主角 2-4 个 + 关键配角）：每个角色固定两个字段，格式为：\n   **角色名**：身份/性格/核心动机/反差点/与主角关系\n   **定妆描述**：可直接用于 2D 国漫/日漫风格绘制的固定外观锚点，必须包含性别年龄、脸型五官、发型发色、体型、服装配色、标志性配饰、气质；全剧不得改变\n5. 世界观（时代/地点/规则，100-200 字）\n6. 爽点节奏（每 3-5 集一个爆点的情绪曲线规划）\n7. 前 3 集要点（每集 2-3 句话）\n\n试跑模式（试跑=是）请精简输出：剧名 + 一句话卖点 + 一段 100 字梗概 + 主角 2 个简卡；简卡格式同人物卡：**角色名**：身份/动机/反差；**定妆描述**：固定外观锚点（发型发色/服装/气质等）。\n\n人物卡的「定妆描述」是全剧唯一外观依据，后续每集画面提示词都会引用它，必须具体、可绘制、不随时间变化。\n\n只输出正文，不要输出任何解释。\n"
         retry_config:
           enabled: false
           exponential_backoff:
@@ -777,7 +716,7 @@ workflow:
             {{#conversation.revision_note#}}
 
 
-            要求：尊重原创意方向，仅按意见调整（人设/冲突/节奏/题材均可）；输出结构与「大纲生成」一致（正式版：剧名/卖点/梗概/人物卡/世界观/爽点节奏/前三集要点；若原大纲是精简版则保持精简）；意见矛盾时按最合理方向调整，并在结尾一行「调整说明」标注；只输出正文。
+            要求：尊重原创意方向，仅按意见调整（人设/冲突/节奏/题材均可）；输出结构与「大纲生成」一致（正式版：剧名/卖点/梗概/人物卡/世界观/爽点节奏/前三集要点；若原大纲是精简版则保持精简）；人物卡每个角色必须含「定妆描述」字段（固定外观锚点），且与修改前的定妆描述保持连贯；意见矛盾时按最合理方向调整，并在结尾一行「调整说明」标注；只输出正文。
 
             '
         retry_config:
@@ -937,8 +876,7 @@ workflow:
 
             规则：
 
-            - 正式模式：生成 {{#start.episode_count#}} 个元素，集数从 1 连续递增；前 3 集完成人物登场与第一个爆点，最后
-            3 集收束主线；每集都要写清结尾钩子。
+            - 正式模式：生成 {{#start.episode_count#}} 个元素，集数从 1 连续递增；前 3 集完成人物登场与第一个爆点，最后 3 集收束主线；每集都要写清结尾钩子。
 
             - 试跑模式：只输出 1 个元素（第 1 集），突出开场冲突与钩子。
 
@@ -1006,24 +944,12 @@ workflow:
       type: custom
       width: 244
     - data:
-        code: "import json\nimport re\n\ndef main(plan_text: str) -> dict:\n    text\
-          \ = (plan_text or \"\").strip()\n    text = re.sub(r\"^```(?:json)?\\s*|\\\
-          s*```$\", \"\", text, flags=re.S).strip()\n    try:\n        data = json.loads(text)\n\
-          \        if isinstance(data, list) and data:\n            episodes = []\n\
-          \            for i, item in enumerate(data):\n                if isinstance(item,\
-          \ dict):\n                    episodes.append({\n                      \
-          \  \"number\": item.get(\"number\") or (i + 1),\n                      \
-          \  \"title\": str(item.get(\"title\") or \"\"),\n                      \
-          \  \"synopsis\": str(item.get(\"synopsis\") or \"\"),\n                \
-          \    })\n            if episodes:\n                return {\"episodes\"\
-          : episodes}\n    except Exception:\n        pass\n    return {\"episodes\"\
-          : [{\"number\": 1, \"title\": \"全剧\", \"synopsis\": text or \"（分集规划解析失败，按单集兜底）\"\
-          }]}\n"
+        code: "import json\nimport re\n\ndef main(plan_text: str) -> dict:\n    text = (plan_text or \"\").strip()\n    text = re.sub(r\"^```(?:json)?\\s*|\\s*```$\", \"\", text, flags=re.S).strip()\n    try:\n        data = json.loads(text)\n        if isinstance(data, list) and data:\n            episodes = []\n            for i, item in enumerate(data):\n                if isinstance(item, dict):\n                    episodes.append({\n                        \"number\": item.get(\"number\") or (i + 1),\n                        \"title\": str(item.get(\"title\") or \"\"),\n                        \"synopsis\": str(item.get(\"synopsis\") or \"\"),\n                    })\n            if episodes:\n                return {\"episodes\": episodes}\n    except Exception:\n        pass\n    return {\"episodes\": [{\"number\": 1, \"title\": \"全剧\", \"synopsis\": text or \"（分集规划解析失败，按单集兜底）\"}]}\n"
         code_language: python3
         desc: 解析分集规划 JSON 为数组
         outputs:
           episodes:
-            children: null
+            children:
             type: array[object]
         selected: false
         title: 解析分集规划
@@ -1127,12 +1053,7 @@ workflow:
         - role: system
           text: 你是金牌短剧编剧。根据全集大纲、人物卡与本集梗概，写出一集完整剧本。
         - role: user
-          text: "全集大纲与人物卡：\n{{#conversation.confirmed_outline#}}\n\n本集信息：第 {{#ep_loop.item.number#}}\
-            \ 集「{{#ep_loop.item.title#}}」\n本集梗概：{{#ep_loop.item.synopsis#}}\n目标字数：{{#start.words_per_episode#}}\
-            \ 字（试跑模式约 500-800 字）\n\n输出 Markdown 格式：\n## 第N集：标题\n### 场景 1\n- 场景地点/时间：...\n\
-            - 人物：...\n- 剧情与动作：...\n- 对白：\n  - 角色A：台词\n  - 角色B：台词\n- 情绪：...\n- 画面提示词（文生视频）：镜头/景别\
-            \ + 画面描述（人物、动作、环境、光线）+ 风格，可直接用于文生视频\n（场景 2、3……）\n### 本集结尾钩子\n（1-2 句，制造悬念/反转/危机）\n\
-            ### 本集摘要\n（80 字内：本集进展 + 下一集引子）\n\n规则：3-6 个场景，节奏快；台词短促口语化有冲突；严格遵守人物卡设定；承接上一集因果；结尾必须给足钩子；每个场景必须输出「画面提示词（文生视频）」一行；只输出剧本本体。\n"
+          text: "全集大纲与人物卡：\n{{#conversation.confirmed_outline#}}\n\n本集信息：第 {{#ep_loop.item.number#}} 集「{{#ep_loop.item.title#}}」\n本集梗概：{{#ep_loop.item.synopsis#}}\n目标字数：{{#start.words_per_episode#}} 字（试跑模式约 500-800 字）\n\n输出 Markdown 格式：\n## 第N集：标题\n### 场景 1\n- 场景地点/时间：...\n- 人物：...\n- 剧情与动作：...\n- 对白：\n  - 角色A：台词\n  - 角色B：台词\n- 情绪：...\n- 画面提示词（文生视频）：镜头/景别 + 画面描述（人物、动作、环境、光线）+ 风格，可直接用于文生视频；人物描述必须原样包含该场景出场角色的「定妆描述」（发型发色/服装配色/气质等），禁止改写外观\n（场景 2、3……）\n### 本集结尾钩子\n（1-2 句，制造悬念/反转/危机）\n### 本集摘要\n（80 字内：本集进展 + 下一集引子）\n\n规则：3-6 个场景，节奏快；台词短促口语化有冲突；严格遵守人物卡及「定妆描述」设定，不改变人设与外观；承接上一集因果；结尾必须给足钩子；每个场景必须输出「画面提示词（文生视频）」一行且包含出场角色定妆描述；只输出剧本本体。\n"
         retry_config:
           enabled: false
           exponential_backoff:
@@ -1218,14 +1139,12 @@ workflow:
       width: 320
       zIndex: 1002
     - data:
-        code: "def main(scripts: list) -> dict:\n    parts = []\n    for i, s in enumerate(scripts\
-          \ or []):\n        parts.append(str(s).strip())\n    return {\"all_scripts\"\
-          : \"\\n\\n---\\n\\n\".join(parts)}\n"
+        code: "def main(scripts: list) -> dict:\n    parts = []\n    for i, s in enumerate(scripts or []):\n        parts.append(str(s).strip())\n    return {\"all_scripts\": \"\\n\\n---\\n\\n\".join(parts)}\n"
         code_language: python3
         desc: 合并全部分集剧本
         outputs:
           all_scripts:
-            children: null
+            children:
             type: string
         selected: false
         title: 合并剧本
@@ -1250,37 +1169,12 @@ workflow:
       type: custom
       width: 300
     - data:
-        code: "import re\n\ndef main(all_scripts: str) -> dict:\n    text = all_scripts\
-          \ or \"\"\n    episodes = re.split(r\"(?=## 第\\d+集)\", text)\n    pack_lines\
-          \ = []\n    for ep in episodes:\n        ep = ep.strip()\n        if not\
-          \ ep:\n            continue\n        m = re.match(r\"## 第(\\d+)集\", ep)\n\
-          \        ep_no = m.group(1) if m else \"?\"\n        scenes = re.split(r\"\
-          (?=### 场景\\s*\\d+)\", ep)\n        scene_idx = 0\n        for sc in scenes:\n\
-          \            sc = sc.strip()\n            if not sc.startswith(\"### 场景\"\
-          ):\n                continue\n            scene_idx += 1\n            pm\
-          \ = re.search(r\"^\\s*[-*]\\s*画面提示词[^：:]*[：:]\\s*(.+)$\", sc, re.M)\n  \
-          \          prompt = pm.group(1).strip() if pm else \"\"\n            if\
-          \ not prompt:\n                am = re.search(r\"^\\s*[-*]\\s*剧情与动作[^：:]*[：:]\\\
-          s*(.+)$\", sc, re.M)\n                prompt = am.group(1).strip() if am\
-          \ else \"\"\n            dialogue = []\n            for line in sc.splitlines():\n\
-          \                s = line.strip()\n                if not s.startswith(\"\
-          - \"):\n                    continue\n                body = s[2:]\n   \
-          \             if \"：\" not in body:\n                    continue\n    \
-          \            key = body.split(\"：\", 1)[0]\n                if key in (\"\
-          场景地点/时间\", \"人物\", \"剧情与动作\", \"对白\", \"情绪\") or \"画面提示词\" in key:\n   \
-          \                 continue\n                dialogue.append(body)\n    \
-          \        pack_lines.append(\"【第%s集 · 场景%d】\" % (ep_no, scene_idx))\n   \
-          \         pack_lines.append(\"画面提示词：\" + prompt)\n            if dialogue:\n\
-          \                pack_lines.append(\"对白/字幕：\" + \"；\".join(dialogue))\n\
-          \            pack_lines.append(\"\")\n    header = (\n        \"# 文生视频提示词包\\\
-          n\\n\"\n        \"使用说明：以下提示词可逐条提供给文生视频 AI；建议统一竖屏 9:16、电影感、每场景 4-6 秒。\\n\\\
-          n\"\n    )\n    body = \"\\n\".join(pack_lines).strip()\n    return {\"\
-          video_pack\": header + body}\n"
+        code: "import re\n\ndef main(all_scripts: str) -> dict:\n    text = all_scripts or \"\"\n    episodes = re.split(r\"(?=## 第\\d+集)\", text)\n    pack_lines = []\n    for ep in episodes:\n        ep = ep.strip()\n        if not ep:\n            continue\n        m = re.match(r\"## 第(\\d+)集\", ep)\n        ep_no = m.group(1) if m else \"?\"\n        scenes = re.split(r\"(?=### 场景\\s*\\d+)\", ep)\n        scene_idx = 0\n        for sc in scenes:\n            sc = sc.strip()\n            if not sc.startswith(\"### 场景\"):\n                continue\n            scene_idx += 1\n            pm = re.search(r\"^\\s*[-*]\\s*画面提示词[^：:]*[：:]\\s*(.+)$\", sc, re.M)\n            prompt = pm.group(1).strip() if pm else \"\"\n            if not prompt:\n                am = re.search(r\"^\\s*[-*]\\s*剧情与动作[^：:]*[：:]\\s*(.+)$\", sc, re.M)\n                prompt = am.group(1).strip() if am else \"\"\n            cm = re.search(r\"^\\s*[-*]\\s*人物[^：:]*[：:]\\s*(.+)$\", sc, re.M)\n            characters = cm.group(1).strip() if cm else \"\"\n            dialogue = []\n            for line in sc.splitlines():\n                s = line.strip()\n                if not s.startswith(\"- \"):\n                    continue\n                body = s[2:]\n                if \"：\" not in body:\n                    continue\n                key = body.split(\"：\", 1)[0]\n                if key in (\"场景地点/时间\", \"人物\", \"剧情与动作\", \"对白\", \"情绪\") or \"画面提示词\" in key:\n                    continue\n                dialogue.append(body)\n            pack_lines.append(\"【第%s集 · 场景%d】\" % (ep_no, scene_idx))\n            if characters:\n                pack_lines.append(\"出场角色：\" + characters)\n            pack_lines.append(\"画面提示词：\" + prompt)\n            if dialogue:\n                pack_lines.append(\"对白/字幕：\" + \"；\".join(dialogue))\n            pack_lines.append(\"\")\n    header = (\n        \"# 文生视频提示词包\\n\\n\"\n        \"使用说明：以下提示词可逐条提供给文生视频 AI；建议统一竖屏 9:16、电影感、每场景 4-6 秒；「出场角色」用于关联人物定妆图。\\n\\n\"\n    )\n    body = \"\\n\".join(pack_lines).strip()\n    return {\"video_pack\": header + body}"
         code_language: python3
         desc: 从剧本中提取画面提示词，组装文生视频提示词包
         outputs:
           video_pack:
-            children: null
+            children:
             type: string
         selected: false
         title: 文生视频提示词包
@@ -1409,21 +1303,13 @@ workflow:
       type: custom
       width: 320
     - data:
-        code: "def main(outline: str, episode_plan: str, all_scripts: str, video_pack:\
-          \ str, qa_report: str, trial_mode: str) -> dict:\n    mode = \"试跑模式（仅第 1\
-          \ 集）\" if trial_mode == \"是\" else \"正式模式\"\n    parts = [\n        \"#\
-          \ 网剧剧本包（%s）\\n\" % mode,\n        \"## 一、大纲与人物设定\\n\",\n        (outline\
-          \ or \"\").strip(),\n        \"\\n\\n## 二、分集规划\\n\\n\",\n        (episode_plan\
-          \ or \"\").strip(),\n        \"\\n\\n## 三、分集剧本\\n\\n\",\n        (all_scripts\
-          \ or \"\").strip(),\n        \"\\n\\n## 四、文生视频提示词包\\n\\n\",\n        (video_pack\
-          \ or \"\").strip(),\n        \"\\n\\n## 五、质检报告\\n\\n\",\n        (qa_report\
-          \ or \"\").strip(),\n    ]\n    return {\"package\": \"\".join(parts)}\n"
+        code: "import re\n\ndef _extract_character_sheet(outline: str) -> str:\n    \"\"\"从大纲人物卡中提取「定妆描述」，组装人物定妆表（全剧固定外观锚点）。\"\"\"\n    lines = (outline or \"\").splitlines()\n    entries = []\n    cur_name = None\n    for raw in lines:\n        s = raw.strip()\n        if not s:\n            continue\n        m = re.match(r\"^[-*]?\\s*\\*\\*(.+?)\\*\\*\\s*[:：]\\s*(.+)$\", s)\n        if m:\n            key = m.group(1).strip()\n            val = m.group(2).strip()\n            if key == \"定妆描述\":\n                entries.append((cur_name or (\"角色%d\" % (len(entries) + 1)), val))\n            elif \"定妆描述\" not in key:\n                cur_name = key\n            continue\n        m2 = re.match(r\"^[-*]?\\s*定妆描述\\s*[:：]\\s*(.+)$\", s)\n        if m2:\n            entries.append((cur_name or (\"角色%d\" % (len(entries) + 1)), m2.group(1).strip()))\n    if not entries:\n        return \"\"\n    rows = [\"## 人物定妆表（全剧固定外观锚点）\", \"\"]\n    for name, desc in entries:\n        rows.append(\"- **%s**：%s\" % (name, desc))\n    rows.append(\"\")\n    return \"\\n\".join(rows)\n\ndef main(outline: str, episode_plan: str, all_scripts: str, video_pack: str, qa_report: str, trial_mode: str) -> dict:\n    mode = \"试跑模式（仅第 1 集）\" if trial_mode == \"是\" else \"正式模式\"\n    char_sheet = _extract_character_sheet(outline)\n    parts = [\n        \"# 网剧剧本包（%s）\\n\" % mode,\n        \"## 一、大纲与人物设定\\n\",\n        (outline or \"\").strip(),\n    ]\n    if char_sheet:\n        parts += [\"\\n\\n\" + char_sheet]\n    parts += [\n        \"\\n\\n## 二、分集规划\\n\\n\",\n        (episode_plan or \"\").strip(),\n        \"\\n\\n## 三、分集剧本\\n\\n\",\n        (all_scripts or \"\").strip(),\n        \"\\n\\n## 四、文生视频提示词包\\n\\n\",\n        (video_pack or \"\").strip(),\n        \"\\n\\n## 五、质检报告\\n\\n\",\n        (qa_report or \"\").strip(),\n    ]\n    return {\"package\": \"\".join(parts)}"
         code_language: python3
         desc: 组装最终剧本包
         height: 240
         outputs:
           package:
-            children: null
+            children:
             type: string
         selected: false
         title: 组装剧本包
@@ -1530,7 +1416,7 @@ workflow:
             用户修改要求：{{#router.rewrite_instruction#}}
 
 
-            要求：只输出第 {{#router.ep_number#}} 集的完整剧本（格式：场景列表/对白/情绪/结尾钩子/本集摘要）；严格按修改要求调整，同时保持与全集大纲和前后集梗概连贯；若集数超出规划范围，输出该集规划内容并说明无法重写；只输出剧本本体。
+            要求：只输出第 {{#router.ep_number#}} 集的完整剧本（格式：场景列表/对白/情绪/结尾钩子/本集摘要）；每个场景的「画面提示词」必须原样包含该场景出场角色的「定妆描述」，禁止改写外观；严格按修改要求调整，同时保持与全集大纲和前后集梗概连贯；若集数超出规划范围，输出该集规划内容并说明无法重写；只输出剧本本体。
 
             '
         retry_config:
