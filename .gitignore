@@ -1,0 +1,22 @@
+# 密钥与环境变量
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# 临时与系统文件
+Thumbs.db
+.DS_Store
+*.log
+.tmp/
+
+# Dify 导入过程中的临时文件
+tmp/

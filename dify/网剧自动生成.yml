@@ -1,0 +1,1580 @@
+app:
+  description: 分阶段确认式网剧（短剧）剧本生成：创意 -> 大纲与人物 -> 确认 -> 分集剧本 -> 质检。内置试跑模式，仅生成第 1 集、约 15 秒。
+  icon: 🎬
+  icon_background: '#E0F2FE'
+  icon_type: emoji
+  mode: advanced-chat
+  name: 网剧自动生成
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.7.0
+workflow:
+  conversation_variables:
+  - description: 最近生成、待确认的大纲与人物设定
+    id: 11111111-1111-4111-8111-111111111101
+    name: draft_outline
+    selector:
+    - conversation
+    - draft_outline
+    value: ''
+    value_type: string
+  - description: 已确认的大纲与人物设定
+    id: 11111111-1111-4111-8111-111111111102
+    name: confirmed_outline
+    selector:
+    - conversation
+    - confirmed_outline
+    value: ''
+    value_type: string
+  - description: 分集规划（JSON，试跑时仅第 1 集）
+    id: 11111111-1111-4111-8111-111111111103
+    name: episode_plan
+    selector:
+    - conversation
+    - episode_plan
+    value: ''
+    value_type: string
+  - description: 最终剧本包（大纲+规划+剧本+质检）
+    id: 11111111-1111-4111-8111-111111111104
+    name: generated_package
+    selector:
+    - conversation
+    - generated_package
+    value: ''
+    value_type: string
+  - description: 用户最近一次修改意见
+    id: 11111111-1111-4111-8111-111111111105
+    name: revision_note
+    selector:
+    - conversation
+    - revision_note
+    value: ''
+    value_type: string
+  environment_variables: []
+  features:
+    file_upload: {}
+    opening_statement: 你好，我是网剧自动生成助手。填写下方「创意描述」等参数后发送，我会先产出大纲与人物设定，你确认后再生成全部分集剧本与质检报告。也可以开启「试跑模式」只生成第 1 集（约 15 秒）。
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - 帮我写一部 12 集的都市逆袭短剧
+    - 试跑模式：生成 1 集看看效果
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start-router
+      source: start
+      sourceHandle: source
+      target: router
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: router-route
+      source: router
+      sourceHandle: source
+      target: route
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: route-outline-gen
+      source: route
+      sourceHandle: outline
+      target: outline_gen
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: assigner
+      id: outline-gen-assign-draft1
+      source: outline_gen
+      sourceHandle: source
+      target: assign_draft1
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: assign-draft1-answer-outline
+      source: assign_draft1
+      sourceHandle: source
+      target: answer_outline
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: route-assign-revision
+      source: route
+      sourceHandle: revise
+      target: assign_revision
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: llm
+      id: assign-revision-outline-revise
+      source: assign_revision
+      sourceHandle: source
+      target: outline_revise
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: assigner
+      id: outline-revise-assign-draft2
+      source: outline_revise
+      sourceHandle: source
+      target: assign_draft2
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: assign-draft2-answer-revise
+      source: assign_draft2
+      sourceHandle: source
+      target: answer_revise
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: route-assign-confirm
+      source: route
+      sourceHandle: confirm
+      target: assign_confirm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: llm
+      id: assign-confirm-plan-gen
+      source: assign_confirm
+      sourceHandle: source
+      target: plan_gen
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: assigner
+      id: plan-gen-assign-plan
+      source: plan_gen
+      sourceHandle: source
+      target: assign_plan
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: code
+      id: assign-plan-parse-plan
+      source: assign_plan
+      sourceHandle: source
+      target: parse_plan
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: iteration
+      id: parse-plan-ep-loop
+      source: parse_plan
+      sourceHandle: source
+      target: ep_loop
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: ep_loop
+        sourceType: iteration-start
+        targetType: llm
+      id: ep-start-ep-llm
+      source: ep_start
+      sourceHandle: source
+      target: ep_llm
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: ep_loop
+        sourceType: llm
+        targetType: template-transform
+      id: ep-llm-ep-format
+      source: ep_llm
+      sourceHandle: source
+      target: ep_format
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: iteration
+        targetType: code
+      id: ep-loop-join-scripts
+      source: ep_loop
+      sourceHandle: source
+      target: join_scripts
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: join-scripts-qa-gen
+      source: join_scripts
+      sourceHandle: source
+      target: qa_gen
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: qa-gen-build-package
+      source: qa_gen
+      sourceHandle: source
+      target: build_package
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: build-package-assign-package
+      source: build_package
+      sourceHandle: source
+      target: assign_package
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: assign-package-answer-final
+      source: assign_package
+      sourceHandle: source
+      target: answer_final
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: route-rewrite-llm
+      source: route
+      sourceHandle: rewrite_ep
+      target: rewrite_llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: rewrite-llm-answer-rewrite
+      source: rewrite_llm
+      sourceHandle: source
+      target: answer_rewrite
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: route-answer-help
+      source: route
+      sourceHandle: help
+      target: answer_help
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: 创意描述
+          max_length: null
+          options: []
+          required: true
+          type: paragraph
+          variable: creative_prompt
+        - label: 题材类型
+          max_length: null
+          options:
+          - 都市逆袭
+          - 古装权谋
+          - 悬疑推理
+          - 甜宠
+          - 战神归来
+          - 逆袭打脸
+          - 其他
+          required: false
+          type: select
+          variable: genre
+        - label: 目标集数
+          max_length: null
+          min: 1
+          max: 24
+          options: []
+          required: false
+          type: number-input
+          value: 12
+          variable: episode_count
+        - label: 每集字数
+          max_length: null
+          min: 500
+          max: 4000
+          options: []
+          required: false
+          type: number-input
+          value: 2500
+          variable: words_per_episode
+        - label: 试跑模式
+          max_length: null
+          options:
+          - 否
+          - 是
+          required: false
+          type: select
+          variable: trial_mode
+        - label: 爆款元素参考（可选）
+          max_length: null
+          options: []
+          required: false
+          type: text-input
+          variable: hot_elements
+      height: 200
+      id: start
+      position:
+        x: 30
+        y: 60
+      positionAbsolute:
+        x: 30
+        y: 60
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: |
+          import re
+
+          CN_NUM = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5,
+                    "六": 6, "七": 7, "八": 8, "九": 9}
+
+
+          def _cn_to_int(s: str) -> int:
+              if s.isdigit():
+                  return int(s)
+              if s == "十":
+                  return 10
+              total = 0
+              if s.startswith("十"):
+                  total = 10 + CN_NUM.get(s[1:], 0)
+                  return total
+              if "十" in s:
+                  left, _, right = s.partition("十")
+                  return CN_NUM.get(left, 0) * 10 + CN_NUM.get(right, 0)
+              return CN_NUM.get(s, 0)
+
+
+          def main(query: str, draft_outline: str, confirmed_outline: str) -> dict:
+              q = (query or "").strip()
+              confirm_kw = ["确认", "可以", "开始", "继续", "没问题", "同意", "通过", "ok", "好的", "行", "就这样"]
+              revise_kw = ["修改", "调整", "不要", "不行", "换成", "重来", "重新", "再写", "换一个", "按这个改"]
+              if not draft_outline and not confirmed_outline:
+                  return {"intent": "outline", "ep_number": 0, "rewrite_instruction": ""}
+              if confirmed_outline:
+                  m = re.search(r"第\s*([0-9一二三四五六七八九十两]+)\s*集", q)
+                  if m and any(k in q for k in ["重写", "修改", "改", "换"]):
+                      return {"intent": "rewrite_ep", "ep_number": _cn_to_int(m.group(1)),
+                              "rewrite_instruction": q}
+                  return {"intent": "help", "ep_number": 0, "rewrite_instruction": ""}
+              if any(k in q.lower() for k in confirm_kw):
+                  return {"intent": "confirm", "ep_number": 0, "rewrite_instruction": ""}
+              if any(k in q for k in revise_kw):
+                  return {"intent": "revise", "ep_number": 0, "rewrite_instruction": q}
+              return {"intent": "help", "ep_number": 0, "rewrite_instruction": ""}
+        code_language: python3
+        desc: 根据会话状态与用户消息计算意图
+        outputs:
+          ep_number:
+            children: null
+            type: number
+          intent:
+            children: null
+            type: string
+          rewrite_instruction:
+            children: null
+            type: string
+        selected: false
+        title: 路由
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - query
+          value_type: string
+          variable: query
+        - value_selector:
+          - conversation
+          - draft_outline
+          value_type: string
+          variable: draft_outline
+        - value_selector:
+          - conversation
+          - confirmed_outline
+          value_type: string
+          variable: confirmed_outline
+      height: 300
+      id: router
+      position:
+        x: 360
+        y: 60
+      positionAbsolute:
+        x: 360
+        y: 60
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        cases:
+        - case_id: outline
+          conditions:
+          - comparison_operator: is
+            id: cond-outline
+            value: outline
+            varType: string
+            variable_selector:
+            - router
+            - intent
+          id: outline
+          logical_operator: and
+        - case_id: confirm
+          conditions:
+          - comparison_operator: is
+            id: cond-confirm
+            value: confirm
+            varType: string
+            variable_selector:
+            - router
+            - intent
+          id: confirm
+          logical_operator: and
+        - case_id: revise
+          conditions:
+          - comparison_operator: is
+            id: cond-revise
+            value: revise
+            varType: string
+            variable_selector:
+            - router
+            - intent
+          id: revise
+          logical_operator: and
+        - case_id: rewrite_ep
+          conditions:
+          - comparison_operator: is
+            id: cond-rewrite
+            value: rewrite_ep
+            varType: string
+            variable_selector:
+            - router
+            - intent
+          id: rewrite_ep
+          logical_operator: and
+        - case_id: help
+          conditions:
+          - comparison_operator: is
+            id: cond-help
+            value: help
+            varType: string
+            variable_selector:
+            - router
+            - intent
+          id: help
+          logical_operator: and
+        desc: 按意图分流
+        selected: false
+        title: 意图分流
+        type: if-else
+      height: 320
+      id: route
+      position:
+        x: 720
+        y: 60
+      positionAbsolute:
+        x: 720
+        y: 60
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 生成大纲与人物设定
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+            {{#sys.files#}}'
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            max_tokens: 2000
+            temperature: 0.9
+          mode: chat
+          name: qwen-max
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - role: system
+          text: 你是国内头部短剧公司的首席总编剧，擅长打造高留存、强钩子的竖屏短剧。铁律：开场即冲突；每 3 集一个爆点；集集有钩子；人设反差强烈；情绪优先；短句快节奏；不涉政、不涉黄赌毒、不抄袭真实人物与已有作品；全程使用简体中文。
+        - role: user
+          text: |
+            请根据以下创意与设定，产出这部网剧的「大纲与人物设定」。
+
+            创意描述：{{#start.creative_prompt#}}
+            题材类型：{{#start.genre#}}
+            目标集数：{{#start.episode_count#}}
+            爆款元素参考：{{#start.hot_elements#}}
+            试跑模式：{{#start.trial_mode#}}
+
+            正式模式（试跑=否）请按以下结构输出 Markdown：
+            1. 剧名（10 字内，有记忆点）
+            2. 一句话卖点（30 字内：谁+冲突+爽点）
+            3. 故事梗概（300-500 字：起因、发展、高潮、结局方向）
+            4. 人物卡（主角 2-4 个 + 关键配角）：名字/身份/性格/核心动机/反差点/与主角关系
+            5. 世界观（时代/地点/规则，100-200 字）
+            6. 爽点节奏（每 3-5 集一个爆点的情绪曲线规划）
+            7. 前 3 集要点（每集 2-3 句话）
+
+            试跑模式（试跑=是）请精简输出：剧名 + 一句话卖点 + 一段 100 字梗概 + 主角 2 个简卡（名字/身份/动机/反差）。
+
+            只输出正文，不要输出任何解释。
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: true
+        structured_output:
+          enabled: false
+        title: 大纲生成
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 300
+      id: outline_gen
+      position:
+        x: 1040
+        y: -140
+      positionAbsolute:
+        x: 1040
+        y: -140
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - outline_gen
+          - text
+          variable_selector:
+          - conversation
+          - draft_outline
+          write_mode: over-write
+        selected: false
+        title: 保存大纲草稿
+        type: assigner
+        version: '2'
+      height: 86
+      id: assign_draft1
+      position:
+        x: 1420
+        y: -140
+      positionAbsolute:
+        x: 1420
+        y: -140
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#conversation.draft_outline#}}
+
+          ---
+
+          请回复「确认」继续生成分集剧本；也可以直接输入修改意见，我会按你的意见修订后再次请你确认。'
+        desc: ''
+        selected: false
+        title: 展示大纲
+        type: answer
+        variables: []
+      height: 120
+      id: answer_outline
+      position:
+        x: 1740
+        y: -140
+      positionAbsolute:
+        x: 1740
+        y: -140
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - sys
+          - query
+          variable_selector:
+          - conversation
+          - revision_note
+          write_mode: over-write
+        selected: false
+        title: 保存修改意见
+        type: assigner
+        version: '2'
+      height: 86
+      id: assign_revision
+      position:
+        x: 1040
+        y: 40
+      positionAbsolute:
+        x: 1040
+        y: 40
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 按意见修订大纲
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+            {{#sys.files#}}'
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            max_tokens: 2000
+            temperature: 0.8
+          mode: chat
+          name: qwen-max
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - role: system
+          text: 你是首席总编剧。用户对刚才的大纲不满意，请根据修改意见重写「大纲与人物设定」。
+        - role: user
+          text: |
+            当前大纲：
+            {{#conversation.draft_outline#}}
+
+            用户修改意见：
+            {{#conversation.revision_note#}}
+
+            要求：尊重原创意方向，仅按意见调整（人设/冲突/节奏/题材均可）；输出结构与「大纲生成」一致（正式版：剧名/卖点/梗概/人物卡/世界观/爽点节奏/前三集要点；若原大纲是精简版则保持精简）；意见矛盾时按最合理方向调整，并在结尾一行「调整说明」标注；只输出正文。
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: true
+        structured_output:
+          enabled: false
+        title: 大纲修订
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 280
+      id: outline_revise
+      position:
+        x: 1420
+        y: 40
+      positionAbsolute:
+        x: 1420
+        y: 40
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - outline_revise
+          - text
+          variable_selector:
+          - conversation
+          - draft_outline
+          write_mode: over-write
+        selected: false
+        title: 保存修订后大纲
+        type: assigner
+        version: '2'
+      height: 86
+      id: assign_draft2
+      position:
+        x: 1800
+        y: 40
+      positionAbsolute:
+        x: 1800
+        y: 40
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: 已根据你的意见修订大纲：
+
+          {{#conversation.draft_outline#}}
+
+          ---
+
+          请回复「确认」继续，或继续提出修改意见。
+        desc: ''
+        selected: false
+        title: 展示修订后大纲
+        type: answer
+        variables: []
+      height: 120
+      id: answer_revise
+      position:
+        x: 2120
+        y: 40
+      positionAbsolute:
+        x: 2120
+        y: 40
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - conversation
+          - draft_outline
+          variable_selector:
+          - conversation
+          - confirmed_outline
+          write_mode: over-write
+        selected: false
+        title: 确认大纲
+        type: assigner
+        version: '2'
+      height: 86
+      id: assign_confirm
+      position:
+        x: 1040
+        y: 220
+      positionAbsolute:
+        x: 1040
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 生成分集规划
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+            {{#sys.files#}}'
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            max_tokens: 4000
+            temperature: 0.7
+          mode: chat
+          name: qwen-max
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - role: system
+          text: 你是首席总编剧。基于已确认的大纲与人物，做整部剧的分集规划。
+        - role: user
+          text: |
+            已确认大纲：
+            {{#conversation.confirmed_outline#}}
+
+            目标集数：{{#start.episode_count#}}
+            每集字数：{{#start.words_per_episode#}}
+            试跑模式：{{#start.trial_mode#}}
+
+            只输出一个 JSON 数组，不要输出任何其他文字或代码块围栏。数组每个元素：
+            {"number": 集数(数字), "title": "本集标题(8字内)", "synopsis": "本集梗概(80-150字，含本集冲突、进展、结尾钩子)"}
+
+            规则：
+            - 正式模式：生成 {{#start.episode_count#}} 个元素，集数从 1 连续递增；前 3 集完成人物登场与第一个爆点，最后 3 集收束主线；每集都要写清结尾钩子。
+            - 试跑模式：只输出 1 个元素（第 1 集），突出开场冲突与钩子。
+            - 集与集因果连贯，人物动机一致。
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: true
+        structured_output:
+          enabled: false
+        title: 分集规划
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 300
+      id: plan_gen
+      position:
+        x: 1420
+        y: 220
+      positionAbsolute:
+        x: 1420
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - plan_gen
+          - text
+          variable_selector:
+          - conversation
+          - episode_plan
+          write_mode: over-write
+        selected: false
+        title: 保存分集规划
+        type: assigner
+        version: '2'
+      height: 86
+      id: assign_plan
+      position:
+        x: 1800
+        y: 220
+      positionAbsolute:
+        x: 1800
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: |
+          import json
+          import re
+
+          def main(plan_text: str) -> dict:
+              text = (plan_text or "").strip()
+              text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.S).strip()
+              try:
+                  data = json.loads(text)
+                  if isinstance(data, list) and data:
+                      episodes = []
+                      for i, item in enumerate(data):
+                          if isinstance(item, dict):
+                              episodes.append({
+                                  "number": item.get("number") or (i + 1),
+                                  "title": str(item.get("title") or ""),
+                                  "synopsis": str(item.get("synopsis") or ""),
+                              })
+                      if episodes:
+                          return {"episodes": episodes}
+              except Exception:
+                  pass
+              return {"episodes": [{"number": 1, "title": "全剧", "synopsis": text or "（分集规划解析失败，按单集兜底）"}]}
+        code_language: python3
+        desc: 解析分集规划 JSON 为数组
+        outputs:
+          episodes:
+            children: null
+            type: array[object]
+        selected: false
+        title: 解析分集规划
+        type: code
+        variables:
+        - value_selector:
+          - conversation
+          - episode_plan
+          value_type: string
+          variable: plan_text
+      height: 220
+      id: parse_plan
+      position:
+        x: 2120
+        y: 220
+      positionAbsolute:
+        x: 2120
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        desc: 逐集生成剧本（可并行）
+        error_handle_mode: terminated
+        height: 178
+        is_parallel: true
+        iterator_input_type: array[object]
+        iterator_selector:
+        - parse_plan
+        - episodes
+        output_selector:
+        - ep_format
+        - output
+        output_type: array[string]
+        parallel_nums: 4
+        selected: false
+        start_node_id: ep_start
+        title: 逐集生成
+        type: iteration
+        width: 388
+      height: 178
+      id: ep_loop
+      position:
+        x: 2500
+        y: 220
+      positionAbsolute:
+        x: 2500
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 388
+      zIndex: 1
+    - data:
+        desc: ''
+        isInIteration: true
+        selected: false
+        title: ''
+        type: iteration-start
+      draggable: false
+      height: 48
+      id: ep_start
+      parentId: ep_loop
+      position:
+        x: 24
+        y: 68
+      positionAbsolute:
+        x: 2524
+        y: 288
+      selectable: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-iteration-start
+      width: 44
+      zIndex: 1002
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 生成本集剧本
+        isInIteration: true
+        iteration_id: ep_loop
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+            {{#sys.files#}}'
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            max_tokens: 4000
+            temperature: 0.8
+          mode: chat
+          name: qwen-turbo
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - role: system
+          text: 你是金牌短剧编剧。根据全集大纲、人物卡与本集梗概，写出一集完整剧本。
+        - role: user
+          text: |
+            全集大纲与人物卡：
+            {{#conversation.confirmed_outline#}}
+
+            本集信息：第 {{#ep_start.item.number#}} 集「{{#ep_start.item.title#}}」
+            本集梗概：{{#ep_start.item.synopsis#}}
+            目标字数：{{#start.words_per_episode#}} 字（试跑模式约 500-800 字）
+
+            输出 Markdown 格式：
+            ## 第N集：标题
+            ### 场景 1
+            - 场景地点/时间：...
+            - 人物：...
+            - 剧情与动作：...
+            - 对白：
+              - 角色A：台词
+              - 角色B：台词
+            - 情绪：...
+            （场景 2、3……）
+            ### 本集结尾钩子
+            （1-2 句，制造悬念/反转/危机）
+            ### 本集摘要
+            （80 字内：本集进展 + 下一集引子）
+
+            规则：3-6 个场景，节奏快；台词短促口语化有冲突；严格遵守人物卡设定；承接上一集因果；结尾必须给足钩子；只输出剧本本体。
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: true
+        structured_output:
+          enabled: false
+        title: 本集剧本
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 300
+      id: ep_llm
+      parentId: ep_loop
+      position:
+        x: 128
+        y: 68
+      positionAbsolute:
+        x: 2628
+        y: 288
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+      zIndex: 1002
+    - data:
+        desc: ''
+        isInIteration: true
+        iteration_id: ep_loop
+        selected: false
+        template: '## 第{{#number#}}集：{{#title#}}
+
+          {{#synopsis#}}
+
+          {{#script#}}'
+        title: 本集格式化
+        type: template-transform
+        variables:
+        - value_selector:
+          - ep_start
+          - item
+          - number
+          value_type: number
+          variable: number
+        - value_selector:
+          - ep_start
+          - item
+          - title
+          value_type: string
+          variable: title
+        - value_selector:
+          - ep_start
+          - item
+          - synopsis
+          value_type: string
+          variable: synopsis
+        - value_selector:
+          - ep_llm
+          - text
+          value_type: string
+          variable: script
+      height: 120
+      id: ep_format
+      parentId: ep_loop
+      position:
+        x: 520
+        y: 68
+      positionAbsolute:
+        x: 3020
+        y: 288
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+      zIndex: 1002
+    - data:
+        code: |
+          def main(scripts: list) -> dict:
+              parts = []
+              for i, s in enumerate(scripts or []):
+                  parts.append(str(s).strip())
+              return {"all_scripts": "\n\n---\n\n".join(parts)}
+        code_language: python3
+        desc: 合并全部分集剧本
+        outputs:
+          all_scripts:
+            children: null
+            type: string
+        selected: false
+        title: 合并剧本
+        type: code
+        variables:
+        - value_selector:
+          - ep_loop
+          - output
+          value_type: array[string]
+          variable: scripts
+      height: 140
+      id: join_scripts
+      position:
+        x: 2960
+        y: 220
+      positionAbsolute:
+        x: 2960
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 质检报告
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+            {{#sys.files#}}'
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            max_tokens: 2000
+            temperature: 0.3
+          mode: chat
+          name: qwen-max
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - role: system
+          text: 你是资深剧本审稿人。对整部剧本做质量检查并输出质检报告。
+        - role: user
+          text: |
+            全集大纲与人物卡：
+            {{#conversation.confirmed_outline#}}
+
+            全部剧本：
+            {{#join_scripts.all_scripts#}}
+
+            试跑模式：{{#start.trial_mode#}}
+
+            检查项：
+            1. 人物一致性：名字、身份、性格、称呼是否前后统一。
+            2. 剧情连贯性：场景之间、集与集之间是否有因果断裂或时间线矛盾。
+            3. 钩子强度：每集结尾钩子是否有效（缺失/平淡标出）。
+            4. 字数：是否严重偏离目标字数（只报严重偏离）。
+            5. 敏感词与合规：是否出现违规或敏感内容。
+
+            输出 Markdown：
+            # 质检报告
+            ## 总评
+            （3-5 句话）
+            ## 问题清单
+            - 第X集：问题描述（类型：人物一致性/连贯性/钩子/字数/合规）
+            ## 需修订集数
+            第X集、第Y集……（无则写：无）
+            ## 修改建议
+            （针对每个问题的具体建议）
+
+            试跑模式只检查第 1 集的钩子与合规，输出精简报告。禁止输出剧本本身。
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: true
+        structured_output:
+          enabled: false
+        title: 质检
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 300
+      id: qa_gen
+      position:
+        x: 3340
+        y: 220
+      positionAbsolute:
+        x: 3340
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    - data:
+        code: |
+          def main(outline: str, episode_plan: str, all_scripts: str, qa_report: str, trial_mode: str) -> dict:
+              mode = "试跑模式（仅第 1 集）" if trial_mode == "是" else "正式模式"
+              parts = [
+                  "# 网剧剧本包（%s）\n" % mode,
+                  "## 一、大纲与人物设定\n",
+                  (outline or "").strip(),
+                  "\n\n## 二、分集规划\n\n",
+                  (episode_plan or "").strip(),
+                  "\n\n## 三、分集剧本\n\n",
+                  (all_scripts or "").strip(),
+                  "\n\n## 四、质检报告\n\n",
+                  (qa_report or "").strip(),
+              ]
+              return {"package": "".join(parts)}
+        code_language: python3
+        desc: 组装最终剧本包
+        outputs:
+          package:
+            children: null
+            type: string
+        selected: false
+        title: 组装剧本包
+        type: code
+        variables:
+        - value_selector:
+          - conversation
+          - confirmed_outline
+          value_type: string
+          variable: outline
+        - value_selector:
+          - conversation
+          - episode_plan
+          value_type: string
+          variable: episode_plan
+        - value_selector:
+          - join_scripts
+          - all_scripts
+          value_type: string
+          variable: all_scripts
+        - value_selector:
+          - qa_gen
+          - text
+          value_type: string
+          variable: qa_report
+        - value_selector:
+          - start
+          - trial_mode
+          value_type: string
+          variable: trial_mode
+      height: 220
+      id: build_package
+      position:
+        x: 3740
+        y: 220
+      positionAbsolute:
+        x: 3740
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - build_package
+          - package
+          variable_selector:
+          - conversation
+          - generated_package
+          write_mode: over-write
+        selected: false
+        title: 保存剧本包
+        type: assigner
+        version: '2'
+      height: 86
+      id: assign_package
+      position:
+        x: 4100
+        y: 220
+      positionAbsolute:
+        x: 4100
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#conversation.generated_package#}}'
+        desc: ''
+        selected: false
+        title: 输出剧本包
+        type: answer
+        variables: []
+      height: 80
+      id: answer_final
+      position:
+        x: 4400
+        y: 220
+      positionAbsolute:
+        x: 4400
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 单集重写
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+            {{#sys.files#}}'
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            max_tokens: 4000
+            temperature: 0.8
+          mode: chat
+          name: qwen-turbo
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - role: system
+          text: 你是金牌短剧编剧。用户要求重写某一集剧本。
+        - role: user
+          text: |
+            全集大纲与人物卡：
+            {{#conversation.confirmed_outline#}}
+
+            分集规划：
+            {{#conversation.episode_plan#}}
+
+            要重写的集数：第 {{#router.ep_number#}} 集
+            用户修改要求：{{#router.rewrite_instruction#}}
+
+            要求：只输出第 {{#router.ep_number#}} 集的完整剧本（格式：场景列表/对白/情绪/结尾钩子/本集摘要）；严格按修改要求调整，同时保持与全集大纲和前后集梗概连贯；若集数超出规划范围，输出该集规划内容并说明无法重写；只输出剧本本体。
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: true
+        structured_output:
+          enabled: false
+        title: 单集重写
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 280
+      id: rewrite_llm
+      position:
+        x: 1040
+        y: 400
+      positionAbsolute:
+        x: 1040
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    - data:
+        answer: '已按你的要求重写第 {{#router.ep_number#}} 集：
+
+          {{#rewrite_llm.text#}}'
+        desc: ''
+        selected: false
+        title: 输出重写剧本
+        type: answer
+        variables: []
+      height: 100
+      id: answer_rewrite
+      position:
+        x: 1420
+        y: 400
+      positionAbsolute:
+        x: 1420
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    - data:
+        answer: |-
+          当前状态说明：
+          - 若还没有大纲，请填写「创意描述」后发送。
+          - 有大纲待确认时，回复「确认」继续生成分集剧本；回复修改意见可调整大纲。
+          - 剧本生成后，可回复「重写第 N 集 + 要求」单独重写某一集。
+        desc: ''
+        selected: false
+        title: 帮助
+        type: answer
+        variables: []
+      height: 140
+      id: answer_help
+      position:
+        x: 1040
+        y: 560
+      positionAbsolute:
+        x: 1040
+        y: 560
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    viewport:
+      x: 0
+      y: 0
+      zoom: 0.5
