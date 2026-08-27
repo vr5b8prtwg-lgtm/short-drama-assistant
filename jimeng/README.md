@@ -79,6 +79,26 @@ assets/
 2. **参考图层**：管线用定妆图作为 `image2image` 参考生成场景图（失败自动退回
    `text2image`），并在 `multiframe2video`/`image2video` 中保持同一套画面。
 
+## 标准会员路线（不用高级会员，推荐）
+
+如果你的即梦是标准会员（CLI 被拦截），改用**网页版 API 桥接**，积分照常可用：
+
+1. **启动桥接服务**（二选一）：
+   - Docker：`docker run -d --name jimeng-bridge -p 8000:8000 -e TZ=Asia/Shanghai wwwzhouhui569/jimeng-free-api-all:latest`
+   - 或 Node 源码：`git clone https://github.com/wwwzhouhui/jimeng-free-api-all.git && cd jimeng-free-api-all && npm install && npx playwright-core install chromium && npm run dev`
+   - 详见 `jimeng/bridge/README.md`
+2. **取 sessionid**：浏览器登录 https://jimeng.jianying.com → F12 → Application → Cookies → 复制 `sessionid`。
+3. **验证**：`python -m jimeng.bridge.test_bridge --sessionid <你的sessionid>`
+4. **生成素材清单**（命令行，方便先验证）：
+   ```bash
+   python -m jimeng.bridge.generate --script 剧本包.md --sessionid <sessionid> --out manifest.json
+   ```
+5. **Dify HTTP 节点自动化**：导入 `dify/网剧AI漫剧生成.yml`，先启动本地编排服务
+   `python -m jimeng.bridge.server --port 8100`，然后在 Dify 里填 sessionid / 桥接地址 / 剧本包运行。
+6. **合成整集**：`python -m jimeng.assemble_manifest --manifest manifest.json`
+
+> 非官方接口（自用研究性质），可能随官方调整失效；请勿商用。
+
 ## 成本与合规
 
 - 积分消耗大头是视频生成（image2video/multiframe2video 按秒计分）；建议先用

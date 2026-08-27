@@ -66,6 +66,51 @@ def test_build_package_extracts_character_sheet():
     assert "**沈晚晴**：26 岁冷艳千金，黑色长发及腰，米白风衣；气质清冷。" in pkg
 
 
+DSL_BRIDGE = Path(__file__).resolve().parents[2] / "dify" / "网剧AI漫剧生成.yml"
+
+
+def _bridge_code(node_id):
+    with open(DSL_BRIDGE, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    nodes = {n["id"]: n["data"] for n in data["workflow"]["graph"]["nodes"]}
+    return nodes[node_id]["code"]
+
+
+def test_bridge_build_payload():
+    ns = _exec(_bridge_code("build_payload"))
+    payload = ns["main"](
+        script_package="## 三、分集剧本\n## 第1集：测试",
+        session_id="sid",
+        bridge_url="http://127.0.0.1:8000",
+        skip_video="是",
+        image_model="jimeng-4.5",
+        video_model="jimeng-video-seedance-2.0",
+    )["payload"]
+    import json
+    data = json.loads(payload)
+    assert data["session_id"] == "sid"
+    assert data["base_url"] == "http://127.0.0.1:8000"
+    assert data["skip_video"] is True
+    assert "分集剧本" in data["script_package"]
+
+
+def test_bridge_parse_manifest():
+    ns = _exec(_bridge_code("parse_manifest"))
+    out = ns["main"]({
+        "title": "测试剧",
+        "characters": {"林川": "u1"},
+        "episodes": [{
+            "number": 1, "title": "第一集",
+            "scenes": [{"index": 1, "image_url": "http://x/a.png", "video_url": "http://x/a.mp4"}],
+        }],
+    })
+    assert "测试剧" in out["summary"]
+    assert "第1集" in out["summary"]
+    assert "图片 a.png" in out["summary"]
+    assert "视频 a.mp4" in out["summary"]
+    assert "林川" in out["manifest"]
+
+
 if __name__ == "__main__":
     import traceback
     failed = 0

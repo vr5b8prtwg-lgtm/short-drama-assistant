@@ -47,8 +47,8 @@ def main(path: str) -> int:
     if not data.get("version"):
         errors.append("缺少 version")
     app = data.get("app") or {}
-    if app.get("mode") != "advanced-chat":
-        errors.append("app.mode 必须为 advanced-chat")
+    if app.get("mode") not in {"advanced-chat", "workflow"}:
+        errors.append("app.mode 必须为 advanced-chat 或 workflow")
     workflow = data.get("workflow") or {}
     graph = workflow.get("graph") or {}
     nodes = graph.get("nodes") or []
