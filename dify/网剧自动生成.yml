@@ -41,14 +41,6 @@ workflow:
     - episode_plan
     value: ''
     value_type: string
-  - description: 最终剧本包（大纲+规划+剧本+质检）
-    id: 11111111-1111-4111-8111-111111111104
-    name: generated_package
-    selector:
-    - conversation
-    - generated_package
-    value: ''
-    value_type: string
   - description: 用户最近一次修改意见
     id: 11111111-1111-4111-8111-111111111105
     name: revision_note
@@ -313,21 +305,9 @@ workflow:
         isInIteration: false
         isInLoop: false
         sourceType: code
-        targetType: assigner
-      id: build-package-assign-package
-      source: build_package
-      sourceHandle: source
-      target: assign_package
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: assigner
         targetType: answer
-      id: assign-package-answer-final
-      source: assign_package
+      id: build-package-answer-final
+      source: build_package
       sourceHandle: source
       target: answer_final
       targetHandle: target
@@ -1419,36 +1399,7 @@ workflow:
       type: custom
       width: 300
     - data:
-        desc: ''
-        items:
-        - input_type: variable
-          operation: over-write
-          value:
-          - build_package
-          - package
-          variable_selector:
-          - conversation
-          - generated_package
-          write_mode: over-write
-        selected: false
-        title: 保存剧本包
-        type: assigner
-        version: '2'
-      height: 86
-      id: assign_package
-      position:
-        x: 4100
-        y: 220
-      positionAbsolute:
-        x: 4100
-        y: 220
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 244
-    - data:
-        answer: '{{#conversation.generated_package#}}'
+        answer: '{{#build_package.package#}}'
         desc: ''
         selected: false
         title: 输出剧本包
