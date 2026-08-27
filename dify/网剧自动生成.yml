@@ -280,18 +280,6 @@ workflow:
     - data:
         isInIteration: false
         isInLoop: false
-        sourceType: code
-        targetType: llm
-      id: join-scripts-qa-gen
-      source: join_scripts
-      sourceHandle: source
-      target: qa_gen
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
         sourceType: llm
         targetType: code
       id: qa-gen-build-package
@@ -346,6 +334,30 @@ workflow:
       source: route
       sourceHandle: help
       target: answer_help
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: join-scripts-video-pack
+      source: join_scripts
+      sourceHandle: source
+      target: video_pack
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: video-pack-qa-gen
+      source: video_pack
+      sourceHandle: source
+      target: qa_gen
       targetHandle: target
       type: custom
       zIndex: 0
@@ -1118,9 +1130,9 @@ workflow:
           text: "全集大纲与人物卡：\n{{#conversation.confirmed_outline#}}\n\n本集信息：第 {{#ep_loop.item.number#}}\
             \ 集「{{#ep_loop.item.title#}}」\n本集梗概：{{#ep_loop.item.synopsis#}}\n目标字数：{{#start.words_per_episode#}}\
             \ 字（试跑模式约 500-800 字）\n\n输出 Markdown 格式：\n## 第N集：标题\n### 场景 1\n- 场景地点/时间：...\n\
-            - 人物：...\n- 剧情与动作：...\n- 对白：\n  - 角色A：台词\n  - 角色B：台词\n- 情绪：...\n（场景 2、3……）\n\
-            ### 本集结尾钩子\n（1-2 句，制造悬念/反转/危机）\n### 本集摘要\n（80 字内：本集进展 + 下一集引子）\n\n规则：3-6\
-            \ 个场景，节奏快；台词短促口语化有冲突；严格遵守人物卡设定；承接上一集因果；结尾必须给足钩子；只输出剧本本体。\n"
+            - 人物：...\n- 剧情与动作：...\n- 对白：\n  - 角色A：台词\n  - 角色B：台词\n- 情绪：...\n- 画面提示词（文生视频）：镜头/景别\
+            \ + 画面描述（人物、动作、环境、光线）+ 风格，可直接用于文生视频\n（场景 2、3……）\n### 本集结尾钩子\n（1-2 句，制造悬念/反转/危机）\n\
+            ### 本集摘要\n（80 字内：本集进展 + 下一集引子）\n\n规则：3-6 个场景，节奏快；台词短促口语化有冲突；严格遵守人物卡设定；承接上一集因果；结尾必须给足钩子；每个场景必须输出「画面提示词（文生视频）」一行；只输出剧本本体。\n"
         retry_config:
           enabled: false
           exponential_backoff:
@@ -1238,6 +1250,61 @@ workflow:
       type: custom
       width: 300
     - data:
+        code: "import re\n\ndef main(all_scripts: str) -> dict:\n    text = all_scripts\
+          \ or \"\"\n    episodes = re.split(r\"(?=## 第\\d+集)\", text)\n    pack_lines\
+          \ = []\n    for ep in episodes:\n        ep = ep.strip()\n        if not\
+          \ ep:\n            continue\n        m = re.match(r\"## 第(\\d+)集\", ep)\n\
+          \        ep_no = m.group(1) if m else \"?\"\n        scenes = re.split(r\"\
+          (?=### 场景\\s*\\d+)\", ep)\n        scene_idx = 0\n        for sc in scenes:\n\
+          \            sc = sc.strip()\n            if not sc.startswith(\"### 场景\"\
+          ):\n                continue\n            scene_idx += 1\n            pm\
+          \ = re.search(r\"^\\s*[-*]\\s*画面提示词[^：:]*[：:]\\s*(.+)$\", sc, re.M)\n  \
+          \          prompt = pm.group(1).strip() if pm else \"\"\n            if\
+          \ not prompt:\n                am = re.search(r\"^\\s*[-*]\\s*剧情与动作[^：:]*[：:]\\\
+          s*(.+)$\", sc, re.M)\n                prompt = am.group(1).strip() if am\
+          \ else \"\"\n            dialogue = []\n            for line in sc.splitlines():\n\
+          \                s = line.strip()\n                if not s.startswith(\"\
+          - \"):\n                    continue\n                body = s[2:]\n   \
+          \             if \"：\" not in body:\n                    continue\n    \
+          \            key = body.split(\"：\", 1)[0]\n                if key in (\"\
+          场景地点/时间\", \"人物\", \"剧情与动作\", \"对白\", \"情绪\") or \"画面提示词\" in key:\n   \
+          \                 continue\n                dialogue.append(body)\n    \
+          \        pack_lines.append(\"【第%s集 · 场景%d】\" % (ep_no, scene_idx))\n   \
+          \         pack_lines.append(\"画面提示词：\" + prompt)\n            if dialogue:\n\
+          \                pack_lines.append(\"对白/字幕：\" + \"；\".join(dialogue))\n\
+          \            pack_lines.append(\"\")\n    header = (\n        \"# 文生视频提示词包\\\
+          n\\n\"\n        \"使用说明：以下提示词可逐条提供给文生视频 AI；建议统一竖屏 9:16、电影感、每场景 4-6 秒。\\n\\\
+          n\"\n    )\n    body = \"\\n\".join(pack_lines).strip()\n    return {\"\
+          video_pack\": header + body}\n"
+        code_language: python3
+        desc: 从剧本中提取画面提示词，组装文生视频提示词包
+        outputs:
+          video_pack:
+            children: null
+            type: string
+        selected: false
+        title: 文生视频提示词包
+        type: code
+        variables:
+        - value_selector:
+          - join_scripts
+          - all_scripts
+          value_type: string
+          variable: all_scripts
+      height: 260
+      id: video_pack
+      position:
+        x: 3260
+        y: 220
+      positionAbsolute:
+        x: 3260
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
         context:
           enabled: false
           variable_selector: []
@@ -1342,16 +1409,18 @@ workflow:
       type: custom
       width: 320
     - data:
-        code: "def main(outline: str, episode_plan: str, all_scripts: str, qa_report:\
-          \ str, trial_mode: str) -> dict:\n    mode = \"试跑模式（仅第 1 集）\" if trial_mode\
-          \ == \"是\" else \"正式模式\"\n    parts = [\n        \"# 网剧剧本包（%s）\\n\" % mode,\n\
-          \        \"## 一、大纲与人物设定\\n\",\n        (outline or \"\").strip(),\n    \
-          \    \"\\n\\n## 二、分集规划\\n\\n\",\n        (episode_plan or \"\").strip(),\n\
-          \        \"\\n\\n## 三、分集剧本\\n\\n\",\n        (all_scripts or \"\").strip(),\n\
-          \        \"\\n\\n## 四、质检报告\\n\\n\",\n        (qa_report or \"\").strip(),\n\
-          \    ]\n    return {\"package\": \"\".join(parts)}\n"
+        code: "def main(outline: str, episode_plan: str, all_scripts: str, video_pack:\
+          \ str, qa_report: str, trial_mode: str) -> dict:\n    mode = \"试跑模式（仅第 1\
+          \ 集）\" if trial_mode == \"是\" else \"正式模式\"\n    parts = [\n        \"#\
+          \ 网剧剧本包（%s）\\n\" % mode,\n        \"## 一、大纲与人物设定\\n\",\n        (outline\
+          \ or \"\").strip(),\n        \"\\n\\n## 二、分集规划\\n\\n\",\n        (episode_plan\
+          \ or \"\").strip(),\n        \"\\n\\n## 三、分集剧本\\n\\n\",\n        (all_scripts\
+          \ or \"\").strip(),\n        \"\\n\\n## 四、文生视频提示词包\\n\\n\",\n        (video_pack\
+          \ or \"\").strip(),\n        \"\\n\\n## 五、质检报告\\n\\n\",\n        (qa_report\
+          \ or \"\").strip(),\n    ]\n    return {\"package\": \"\".join(parts)}\n"
         code_language: python3
         desc: 组装最终剧本包
+        height: 240
         outputs:
           package:
             children: null
@@ -1385,6 +1454,11 @@ workflow:
           - trial_mode
           value_type: string
           variable: trial_mode
+        - value_selector:
+          - video_pack
+          - video_pack
+          value_type: string
+          variable: video_pack
       height: 220
       id: build_package
       position:
