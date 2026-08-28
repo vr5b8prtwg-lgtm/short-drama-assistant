@@ -44,10 +44,12 @@ def test_generate_manifest_structure(tmp_path):
          patch.object(jimeng_http, "text2image", side_effect=lambda cfg, prompt, **kw: "http://x/img.png") as m_t2i, \
          patch.object(jimeng_http, "image2image", side_effect=lambda cfg, imgs, prompt, **kw: "http://x/scene.png") as m_i2i, \
          patch.object(jimeng_http, "image2video", side_effect=lambda cfg, img, prompt, **kw: "http://x/vid.mp4") as m_i2v:
-        manifest = gen.generate_manifest(pkg, cfg)
+        manifest = gen.generate_manifest(pkg, cfg, scene_mode="reference")
 
     assert len(manifest["characters"]) == 2
     assert "林川" in manifest["characters"]
+    assert manifest["cover_url"] == "http://x/img.png"  # 1 张封面图
+    assert manifest["drama_title"]
     assert len(manifest["episodes"]) == 1
     ep = manifest["episodes"][0]
     assert len(ep["scenes"]) == 2
@@ -55,8 +57,8 @@ def test_generate_manifest_structure(tmp_path):
     assert sc["image_url"] == "http://x/scene.png"
     assert sc["video_url"] == "http://x/vid.mp4"
     assert len(sc["dialogue"]) >= 1
-    # 定妆图：每位角色 1 次文生图；每场景 1 次图生图 + 1 次图生视频
-    assert m_t2i.call_count == 2
+    # 2 定妆图 + 1 封面 = 3 次文生图；每场景 1 次图生图 + 1 次图生视频
+    assert m_t2i.call_count == 3
     assert m_i2i.call_count == 2
     assert m_i2v.call_count == 2
 
@@ -68,7 +70,7 @@ def test_skip_video(tmp_path):
          patch.object(jimeng_http, "text2image", return_value="http://x/img.png"), \
          patch.object(jimeng_http, "image2image", return_value="http://x/scene.png"), \
          patch.object(jimeng_http, "image2video") as m_i2v:
-        manifest = gen.generate_manifest(pkg, cfg, skip_video=True)
+        manifest = gen.generate_manifest(pkg, cfg, skip_video=True, scene_mode="reference")
     assert m_i2v.call_count == 0
     assert manifest["episodes"][0]["scenes"][0]["video_url"] is None
 
@@ -81,9 +83,9 @@ def test_image2image_fallback(tmp_path):
          patch.object(jimeng_http, "image2image",
                       side_effect=jimeng_http.JimengHTTPError("参考失败")) as m_i2i, \
          patch.object(jimeng_http, "image2video", return_value="http://x/vid.mp4"):
-        manifest = gen.generate_manifest(pkg, cfg)
+        manifest = gen.generate_manifest(pkg, cfg, scene_mode="reference")
     assert m_i2i.call_count == 2
-    assert m_t2i.call_count == 4  # 2 定妆图 + 2 回退
+    assert m_t2i.call_count == 5  # 2 定妆图 + 1 封面 + 2 回退
     assert manifest["episodes"][0]["scenes"][0]["image_url"] == "http://x/fallback.png"
 
 
@@ -126,6 +128,35 @@ def test_http_server_missing_fields(tmp_path):
         server.server_close()
 
 
+
+def test_text_mode_saves_credits(tmp_path):
+    pkg = load_package(FIXTURE)
+    cfg = make_cfg()
+    with patch.object(jimeng_http, "check_login", return_value={}), \
+         patch.object(jimeng_http, "text2image", return_value="http://x/img.png") as m_t2i, \
+         patch.object(jimeng_http, "image2image") as m_i2i, \
+         patch.object(jimeng_http, "image2video", return_value="http://x/vid.mp4") as m_i2v:
+        manifest = gen.generate_manifest(pkg, cfg, scene_mode="text")
+    assert m_i2i.call_count == 0          # 文生图模式不调图生图
+    assert m_t2i.call_count == 5          # 2 定妆 + 1 封面 + 2 场景
+    assert m_i2v.call_count == 2
+    assert manifest["episodes"][0]["scenes"][0]["image_url"] == "http://x/img.png"
+
+
+def test_assets_only_mode(tmp_path):
+    pkg = load_package(FIXTURE)
+    cfg = make_cfg()
+    with patch.object(jimeng_http, "check_login", return_value={}), \
+         patch.object(jimeng_http, "text2image", return_value="http://x/img.png") as m_t2i, \
+         patch.object(jimeng_http, "image2image") as m_i2i, \
+         patch.object(jimeng_http, "image2video") as m_i2v:
+        manifest = gen.generate_manifest(pkg, cfg, skip_scenes=True, skip_video=True)
+    assert m_t2i.call_count == 3          # 2 定妆 + 1 封面
+    assert m_i2i.call_count == 0
+    assert m_i2v.call_count == 0
+    assert manifest["episodes"] == []
+    assert manifest["cover_url"] == "http://x/img.png"
+
 if __name__ == "__main__":
     import tempfile, traceback
     failed = 0
@@ -140,3 +171,31 @@ if __name__ == "__main__":
                 print("FAIL", name)
                 traceback.print_exc()
     sys.exit(1 if failed else 0)
+
+def test_text_mode_saves_credits(tmp_path):
+    pkg = load_package(FIXTURE)
+    cfg = make_cfg()
+    with patch.object(jimeng_http, "check_login", return_value={}), \
+         patch.object(jimeng_http, "text2image", return_value="http://x/img.png") as m_t2i, \
+         patch.object(jimeng_http, "image2image") as m_i2i, \
+         patch.object(jimeng_http, "image2video", return_value="http://x/vid.mp4") as m_i2v:
+        manifest = gen.generate_manifest(pkg, cfg, scene_mode="text")
+    assert m_i2i.call_count == 0          # 文生图模式不调图生图
+    assert m_t2i.call_count == 5          # 2 定妆 + 1 封面 + 2 场景
+    assert m_i2v.call_count == 2
+    assert manifest["episodes"][0]["scenes"][0]["image_url"] == "http://x/img.png"
+
+
+def test_assets_only_mode(tmp_path):
+    pkg = load_package(FIXTURE)
+    cfg = make_cfg()
+    with patch.object(jimeng_http, "check_login", return_value={}), \
+         patch.object(jimeng_http, "text2image", return_value="http://x/img.png") as m_t2i, \
+         patch.object(jimeng_http, "image2image") as m_i2i, \
+         patch.object(jimeng_http, "image2video") as m_i2v:
+        manifest = gen.generate_manifest(pkg, cfg, skip_scenes=True, skip_video=True)
+    assert m_t2i.call_count == 3          # 2 定妆 + 1 封面
+    assert m_i2i.call_count == 0
+    assert m_i2v.call_count == 0
+    assert manifest["episodes"] == []
+    assert manifest["cover_url"] == "http://x/img.png"

@@ -46,6 +46,22 @@ def build_cfg(args):
     return cfg
 
 
+def extract_drama_title(pkg):
+    """从剧本包提取剧名（用于封面）。"""
+    import re
+    outline = pkg.outline or ""
+    m = re.search(r"剧名\s*[：:]\s*《?([^》\n]+)》?", outline)
+    if m:
+        return m.group(1).strip()
+    m = re.search(r"《([^》]+)》", outline)
+    return m.group(1).strip() if m else (pkg.title or "")
+
+
+def cover_prompt(cfg, title):
+    style = (cfg.get("style") or {}).get("prefix", DEFAULT_STYLE)
+    return "%s。竖屏电影感海报封面，画面中央大标题文字：%s，画面精美，无其他文字" % (style, title)
+
+
 def character_prompt(cfg, name, desc):
     style = (cfg.get("style") or {}).get("prefix", DEFAULT_STYLE)
     bg = (cfg.get("style") or {}).get("character_bg", DEFAULT_BG)
@@ -74,12 +90,16 @@ def motion_prompt(cfg, scene):
         "{action}", scene.action or "")
 
 
-def generate_manifest(pkg, cfg, skip_video=False):
-    """执行生成并返回 manifest dict。"""
+def generate_manifest(pkg, cfg, skip_video=False, skip_scenes=False, scene_mode="text"):
+    """执行生成并返回 manifest dict。
+
+    skip_scenes=True 时只生成「定妆图 + 封面图」（试跑/素材模式，最省积分）；
+    scene_mode="text" 场景图用文生图 1 张（省积分）；"reference" 用图生图带定妆参考（更一致但每场景生成 4 张）。
+    """
     jimeng_http.check_login(cfg)
     bridge = cfg.get("bridge") or {}
 
-    # 1) 定妆图
+    # 1) 定妆图（每人 1 张）
     char_urls = {}
     log.info("生成定妆图：%d 位角色", len(pkg.character_sheet))
     for name, desc in pkg.character_sheet:
@@ -92,34 +112,48 @@ def generate_manifest(pkg, cfg, skip_video=False):
         char_urls[name] = url
         log.info("定妆图完成：%s -> %s", name, url)
 
+    # 1.5) 封面图（1 张，带剧名标题）
+    title = extract_drama_title(pkg)
+    log.info("生成封面图（剧名：%s）", title)
+    cover_url = jimeng_http.text2image(
+        cfg, cover_prompt(cfg, title),
+        ratio=bridge.get("ratio", "9:16"),
+        resolution_type=bridge.get("resolution", "2k"),
+    )
+    log.info("封面图完成：%s", cover_url)
+
+    manifest = {"title": pkg.title, "drama_title": title, "cover_url": cover_url,
+                "characters": char_urls, "episodes": []}
+
+    if skip_scenes:
+        log.info("仅素材模式：跳过场景与视频，只输出定妆图+封面")
+        return manifest
+
     # 2) 逐场景生成
     episodes = []
     for ep in pkg.episodes:
         scenes_out = []
         for scene in ep.scenes:
-            log.info("场景图：E%d S%d", ep.number, scene.index)
+            log.info("场景图（%s）：E%d S%d", scene_mode, ep.number, scene.index)
             img_prompt = scene_prompt(cfg, scene, pkg.characters)
-            refs = [char_urls[c] for c in scene.characters if c in char_urls]
-            if refs:
-                try:
-                    image_url = jimeng_http.image2image(
-                        cfg, refs, img_prompt,
-                        ratio=bridge.get("ratio", "9:16"),
-                        resolution_type=bridge.get("resolution", "2k"),
-                    )
-                except jimeng_http.JimengHTTPError as exc:
-                    log.warning("图生图失败，退回文生图：%s", exc)
+            ratio = bridge.get("ratio", "9:16")
+            resolution = bridge.get("resolution", "2k")
+            if scene_mode == "reference":
+                refs = [char_urls[c] for c in scene.characters if c in char_urls]
+                if refs:
+                    try:
+                        image_url = jimeng_http.image2image(
+                            cfg, refs, img_prompt, ratio=ratio, resolution_type=resolution)
+                    except jimeng_http.JimengHTTPError as exc:
+                        log.warning("图生图失败，退回文生图：%s", exc)
+                        image_url = jimeng_http.text2image(
+                            cfg, img_prompt, ratio=ratio, resolution_type=resolution)
+                else:
                     image_url = jimeng_http.text2image(
-                        cfg, img_prompt,
-                        ratio=bridge.get("ratio", "9:16"),
-                        resolution_type=bridge.get("resolution", "2k"),
-                    )
+                        cfg, img_prompt, ratio=ratio, resolution_type=resolution)
             else:
                 image_url = jimeng_http.text2image(
-                    cfg, img_prompt,
-                    ratio=bridge.get("ratio", "9:16"),
-                    resolution_type=bridge.get("resolution", "2k"),
-                )
+                    cfg, img_prompt, ratio=ratio, resolution_type=resolution)
             log.info("场景图完成：%s", image_url)
 
             video_url = None
@@ -145,7 +179,8 @@ def generate_manifest(pkg, cfg, skip_video=False):
             "scenes": scenes_out,
         })
 
-    return {"title": pkg.title, "characters": char_urls, "episodes": episodes}
+    manifest["episodes"] = episodes
+    return manifest
 
 
 def main(argv=None):
@@ -156,6 +191,8 @@ def main(argv=None):
     parser.add_argument("--config", default=None, help="jimeng 配置（可覆盖桥接参数）")
     parser.add_argument("--out", default=None, help="manifest 输出 JSON 路径（默认打印到 stdout）")
     parser.add_argument("--skip-video", action="store_true", help="只生成图片，不生成视频（省积分）")
+    parser.add_argument("--assets-only", action="store_true", help="仅素材：只生成每人 1 张定妆图 + 1 张封面图（最省积分）")
+    parser.add_argument("--scene-mode", default=None, help="场景图模式：text（文生图 1 张，省积分）/ reference（图生图带定妆参考，更一致但每场景 4 张）")
     parser.add_argument("--image-model", default=None)
     parser.add_argument("--video-model", default=None)
     parser.add_argument("--resolution", default=None, help="图片分辨率 1k/2k/4k")
@@ -165,8 +202,15 @@ def main(argv=None):
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     cfg = build_cfg(args)
+    if args.scene_mode:
+        cfg.setdefault("bridge", {})["scene_mode"] = args.scene_mode
     pkg = load_package(args.script)
-    manifest = generate_manifest(pkg, cfg, skip_video=args.skip_video)
+    manifest = generate_manifest(
+        pkg, cfg,
+        skip_video=args.skip_video or args.assets_only,
+        skip_scenes=args.assets_only,
+        scene_mode=(cfg.get("bridge") or {}).get("scene_mode", "text"),
+    )
 
     text = json.dumps(manifest, ensure_ascii=False, indent=2)
     if args.out:

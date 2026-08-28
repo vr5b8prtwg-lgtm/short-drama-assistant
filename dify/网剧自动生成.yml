@@ -647,6 +647,15 @@ workflow:
           required: false
           type: select
           variable: auto_manga
+        - default: 完整（场景+视频）
+          label: 漫剧素材模式（仅素材=每人1张定妆图+1张封面图，最省积分）
+          max_length:
+          options:
+          - 完整（场景+视频）
+          - 仅素材（定妆+封面）
+          required: false
+          type: select
+          variable: asset_mode
       height: 200
       id: start
       position:
@@ -1806,7 +1815,7 @@ workflow:
       type: custom
       width: 244
     - data:
-        code: "def main(script_package: str, session_id: str) -> dict:\n    import json\n    payload = {\n        \"session_id\": session_id,\n        \"script_package\": script_package,\n        \"base_url\": \"http://127.0.0.1:8000\",\n        \"skip_video\": False,\n        \"image_model\": \"jimeng-4.5\",\n        \"video_model\": \"jimeng-video-3.5-pro\",\n    }\n    return {\"payload\": json.dumps(payload, ensure_ascii=False)}\n"
+        code: "def main(script_package: str, session_id: str, asset_mode: str) -> dict:\n    import json\n    assets_only = \"仅素材\" in (asset_mode or \"\")\n    payload = {\n        \"session_id\": session_id,\n        \"script_package\": script_package,\n        \"base_url\": \"http://127.0.0.1:8000\",\n        \"skip_video\": assets_only,\n        \"skip_scenes\": assets_only,\n        \"scene_mode\": \"text\",\n        \"image_model\": \"jimeng-4.5\",\n        \"video_model\": \"jimeng-video-3.5-pro\",\n    }\n    return {\"payload\": json.dumps(payload, ensure_ascii=False)}\n"
         code_language: python3
         desc: 组装编排服务请求体
         height: 240
@@ -1828,6 +1837,11 @@ workflow:
           - session_id
           value_type: string
           variable: session_id
+        - value_selector:
+          - start
+          - asset_mode
+          value_type: string
+          variable: asset_mode
       height: 240
       id: manga_prep
       position:
@@ -1875,7 +1889,7 @@ workflow:
       type: custom
       width: 300
     - data:
-        code: "def main(manifest: dict) -> dict:\n    import json\n    episodes = (manifest or {}).get(\"episodes\") or []\n    chars = (manifest or {}).get(\"characters\") or {}\n    lines = []\n    lines.append(\"剧名：%s\" % ((manifest or {}).get(\"title\") or \"\"))\n    lines.append(\"定妆图：%d 位角色\" % len(chars))\n    lines.append(\"集数：%d\" % len(episodes))\n    for ep in episodes:\n        scenes = ep.get(\"scenes\") or []\n        lines.append(\"第%d集「%s」：%d 个场景\" % (ep.get(\"number\", 0), ep.get(\"title\", \"\"), len(scenes)))\n        for sc in scenes:\n            img = (sc.get(\"image_url\") or \"\").split(\"/\")[-1]\n            vid = (sc.get(\"video_url\") or \"\").split(\"/\")[-1]\n            lines.append(\"  场景%d：图片 %s\" % (sc.get(\"index\", 0), img or sc.get(\"image_url\")))\n            if vid:\n                lines.append(\"          视频 %s\" % vid)\n    return {\"summary\": \"\\n\".join(lines), \"manifest\": json.dumps(manifest, ensure_ascii=False)}\n"
+        code: "def main(manifest: dict) -> dict:\n    import json\n    episodes = (manifest or {}).get(\"episodes\") or []\n    chars = (manifest or {}).get(\"characters\") or {}\n    lines = []\n    lines.append(\"剧名：%s\" % ((manifest or {}).get(\"title\") or \"\"))\n    cover = (manifest or {}).get(\"cover_url\") or \"\"\n    lines.append(\"封面图：%s\" % (cover.split(\"/\")[-1] or cover))\n    lines.append(\"定妆图：%d 位角色\" % len(chars))\n    lines.append(\"集数：%d\" % len(episodes))\n    for ep in episodes:\n        scenes = ep.get(\"scenes\") or []\n        lines.append(\"第%d集「%s」：%d 个场景\" % (ep.get(\"number\", 0), ep.get(\"title\", \"\"), len(scenes)))\n        for sc in scenes:\n            img = (sc.get(\"image_url\") or \"\").split(\"/\")[-1]\n            vid = (sc.get(\"video_url\") or \"\").split(\"/\")[-1]\n            lines.append(\"  场景%d：图片 %s\" % (sc.get(\"index\", 0), img or sc.get(\"image_url\")))\n            if vid:\n                lines.append(\"          视频 %s\" % vid)\n    return {\"summary\": \"\\n\".join(lines), \"manifest\": json.dumps(manifest, ensure_ascii=False)}\n"
         code_language: python3
         desc: 解析素材清单并生成摘要
         height: 260

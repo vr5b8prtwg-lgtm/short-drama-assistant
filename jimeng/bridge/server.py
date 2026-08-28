@@ -83,8 +83,11 @@ class Handler(BaseHTTPRequestHandler):
 
         try:
             skip_video = str(req.get("skip_video", "")).lower() in ("true", "1", "是", "yes")
+            skip_scenes = str(req.get("skip_scenes", "")).lower() in ("true", "1", "是", "yes")
+            scene_mode = str(req.get("scene_mode", "text") or "text").lower()
             pkg = parse_package(script_package)
-            manifest = generate_manifest(pkg, cfg, skip_video=skip_video)
+            manifest = generate_manifest(pkg, cfg, skip_video=skip_video,
+                                         skip_scenes=skip_scenes, scene_mode=scene_mode)
             self._send(200, manifest)
         except Exception as exc:
             log.exception("generate 失败")

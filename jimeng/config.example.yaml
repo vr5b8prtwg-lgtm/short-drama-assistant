@@ -14,6 +14,21 @@ dreamina:
   # 单个任务最大等待时间（秒）
   max_wait_seconds: 900
 
+bridge:
+  # 即梦网页版 API 桥接服务地址（本地桥接，标准会员可用）
+  base_url: "http://127.0.0.1:8000"
+  # 即梦网页版 sessionid（浏览器 Cookie；也可用环境变量 JIMENG_SESSIONID）
+  session_id: ""
+  # 场景图模式：text=文生图 1 张/场景（省积分，推荐）；reference=图生图带定妆参考（更一致但每场景生成 4 张）
+  scene_mode: "text"
+  ratio: "9:16"
+  resolution: "2k"
+  video_resolution: "720p"
+  duration: 5
+  image_model: "jimeng-4.5"
+  # Seedance 需先在即梦网页端完成「安全确认」；未确认前用 3.5-pro
+  video_model: "jimeng-video-3.5-pro"
+
 style:
   # 全局画面风格前缀，固定为 2D 国漫/日漫、竖屏 9:16
   prefix: "2D国漫/日漫风格，精致线稿，电影感光影，高完成度，无文字水印"

@@ -3,6 +3,7 @@
 from pathlib import Path
 import sys
 
+import json
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -78,27 +79,35 @@ def _main_code(node_id):
 
 def test_integrated_manga_prep():
     ns = _exec(_main_code("manga_prep"))
-    payload = ns["main"](
+    full = json.loads(ns["main"](
         script_package="# 网剧剧本包\n## 一、大纲与人物设定",
         session_id="sid2",
-    )["payload"]
-    import json
-    data = json.loads(payload)
-    assert data["session_id"] == "sid2"
-    assert data["base_url"] == "http://127.0.0.1:8000"  # 桥接服务（宿主机）
-    assert data["skip_video"] is False
-    assert data["video_model"] == "jimeng-video-3.5-pro"
-    assert "剧本包" in data["script_package"]
+        asset_mode="完整（场景+视频）",
+    )["payload"])
+    assert full["session_id"] == "sid2"
+    assert full["base_url"] == "http://127.0.0.1:8000"  # 桥接服务（宿主机）
+    assert full["skip_video"] is False
+    assert full["skip_scenes"] is False
+    assert full["scene_mode"] == "text"
+    assert full["video_model"] == "jimeng-video-3.5-pro"
+    assert "剧本包" in full["script_package"]
+    # 仅素材模式
+    assets = json.loads(ns["main"](
+        script_package="pkg", session_id="sid2", asset_mode="仅素材（定妆+封面）")["payload"])
+    assert assets["skip_video"] is True
+    assert assets["skip_scenes"] is True
 
 
 def test_integrated_manga_parse():
     ns = _exec(_main_code("manga_parse"))
     out = ns["main"]({
         "title": "整合剧",
+        "cover_url": "http://x/cover.png",
         "characters": {"林川": "u"},
         "episodes": [{"number": 2, "title": "第二集",
                       "scenes": [{"index": 1, "image_url": "http://x/i.png", "video_url": "http://x/v.mp4"}]}],
     })
+    assert "封面图：cover.png" in out["summary"]
     assert "第2集" in out["summary"]
     assert "图片 i.png" in out["summary"]
     assert "视频 v.mp4" in out["summary"]
