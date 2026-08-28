@@ -98,7 +98,7 @@ python -m jimeng.bridge.test_bridge --sessionid 你的sessionid --video
 
 ## 四、在 Dify 里配置
 
-1. 在 Dify 中创建/导入工作流 **网剧AI漫剧生成**（见仓库 `dify/网剧AI漫剧生成.yml`）
+1. 在 Dify 中导入工作流 **网剧自动生成**（`dify/网剧自动生成.yml`，已整合漫剧生成，不再需要单独的漫剧工作流）
 2. 到 Dify 的「环境变量」里新增：
    - `JIMENG_SESSIONID` = 你的 sessionid
    - `JIMENG_BRIDGE_URL` = `http://127.0.0.1:8000`（若 Dify 跑在 Docker 容器里，改成 `http://host.docker.internal:8000`）

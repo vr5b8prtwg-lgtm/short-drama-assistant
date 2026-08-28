@@ -370,18 +370,6 @@ workflow:
     - data:
         isInIteration: false
         isInLoop: false
-        sourceType: assigner
-        targetType: answer
-      id: assign-package-answer-final
-      source: assign_package
-      sourceHandle: source
-      target: answer_final
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
         sourceType: if-else
         targetType: code
       id: route-manga-manga-prep
@@ -424,6 +412,42 @@ workflow:
       source: manga_parse
       sourceHandle: source
       target: answer_manga
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: if-else
+      id: assign-package-manga-auto
+      source: assign_package
+      sourceHandle: source
+      target: manga_auto
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: manga-auto-yes-manga-prep
+      source: manga_auto
+      sourceHandle: 是
+      target: manga_prep
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: manga-auto-no-answer-final
+      source: manga_auto
+      sourceHandle: 否
+      target: answer_final
       targetHandle: target
       type: custom
       zIndex: 0
@@ -494,6 +518,15 @@ workflow:
           required: false
           type: text-input
           variable: bridge_url
+        - default: 否
+          label: 剧本确认后自动生成漫剧
+          max_length:
+          options:
+          - 否
+          - 是
+          required: false
+          type: select
+          variable: auto_manga
       height: 200
       id: start
       position:
@@ -1730,7 +1763,7 @@ workflow:
       type: custom
       width: 300
     - data:
-        answer: "## 漫剧素材清单\n\n{{#manga_parse.summary#}}\n\n## 清单 JSON（可复制保存为 manifest.json）\n\n{{#manga_parse.manifest#}}\n\n## 下一步（本地合成整集）\npython -m jimeng.assemble_manifest --manifest manifest.json"
+        answer: "## 漫剧素材清单\n\n{{#manga_parse.summary#}}\n\n## 完整剧本包\n\n{{#conversation.script_package#}}\n\n## 清单 JSON（可复制保存为 manifest.json）\n\n{{#manga_parse.manifest#}}\n\n## 下一步（本地合成整集）\npython -m jimeng.assemble_manifest --manifest manifest.json"
         desc: ''
         selected: false
         title: 输出漫剧清单
@@ -1749,6 +1782,47 @@ workflow:
       targetPosition: left
       type: custom
       width: 300
+    - data:
+        cases:
+        - case_id: 是
+          conditions:
+          - comparison_operator: is
+            id: cond-auto-yes
+            value: 是
+            varType: string
+            variable_selector:
+            - start
+            - auto_manga
+          id: 是
+          logical_operator: and
+        - case_id: 否
+          conditions:
+          - comparison_operator: is
+            id: cond-auto-no
+            value: 否
+            varType: string
+            variable_selector:
+            - start
+            - auto_manga
+          id: 否
+          logical_operator: and
+        desc: 按 auto_manga 开关决定确认后是否自动生成漫剧
+        selected: false
+        title: 是否自动出漫剧
+        type: if-else
+      height: 120
+      id: manga_auto
+      position:
+        x: 4320
+        y: 220
+      positionAbsolute:
+        x: 4320
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
     viewport:
       x: 0
       y: 0
