@@ -81,13 +81,13 @@ def test_integrated_manga_prep():
     payload = ns["main"](
         script_package="# 网剧剧本包\n## 一、大纲与人物设定",
         session_id="sid2",
-        bridge_url="http://127.0.0.1:8100",
     )["payload"]
     import json
     data = json.loads(payload)
     assert data["session_id"] == "sid2"
-    assert data["base_url"] == "http://127.0.0.1:8100"
+    assert data["base_url"] == "http://127.0.0.1:8000"  # 桥接服务（宿主机）
     assert data["skip_video"] is False
+    assert data["video_model"] == "jimeng-video-3.5-pro"
     assert "剧本包" in data["script_package"]
 
 

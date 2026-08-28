@@ -1806,7 +1806,7 @@ workflow:
       type: custom
       width: 244
     - data:
-        code: "def main(script_package: str, session_id: str, bridge_url: str) -> dict:\n    import json\n    payload = {\n        \"session_id\": session_id,\n        \"script_package\": script_package,\n        \"base_url\": bridge_url,\n        \"skip_video\": False,\n        \"image_model\": \"jimeng-4.5\",\n        \"video_model\": \"jimeng-video-seedance-2.0\",\n    }\n    return {\"payload\": json.dumps(payload, ensure_ascii=False)}\n"
+        code: "def main(script_package: str, session_id: str) -> dict:\n    import json\n    payload = {\n        \"session_id\": session_id,\n        \"script_package\": script_package,\n        \"base_url\": \"http://127.0.0.1:8000\",\n        \"skip_video\": False,\n        \"image_model\": \"jimeng-4.5\",\n        \"video_model\": \"jimeng-video-3.5-pro\",\n    }\n    return {\"payload\": json.dumps(payload, ensure_ascii=False)}\n"
         code_language: python3
         desc: 组装编排服务请求体
         height: 240
@@ -1828,11 +1828,6 @@ workflow:
           - session_id
           value_type: string
           variable: session_id
-        - value_selector:
-          - start
-          - bridge_url
-          value_type: string
-          variable: bridge_url
       height: 240
       id: manga_prep
       position:
