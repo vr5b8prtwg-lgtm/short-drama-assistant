@@ -651,10 +651,10 @@ workflow:
       id: start
       position:
         x: 30
-        y: 60
+        y: 120
       positionAbsolute:
         x: 30
-        y: 60
+        y: 120
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -701,11 +701,11 @@ workflow:
       height: 300
       id: router
       position:
-        x: 360
-        y: 60
+        x: 400
+        y: 120
       positionAbsolute:
-        x: 360
-        y: 60
+        x: 400
+        y: 120
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -808,11 +808,11 @@ workflow:
       height: 320
       id: route
       position:
-        x: 720
-        y: 60
+        x: 780
+        y: 120
       positionAbsolute:
-        x: 720
-        y: 60
+        x: 780
+        y: 120
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -863,11 +863,11 @@ workflow:
       height: 300
       id: outline_gen
       position:
-        x: 1040
-        y: -140
+        x: 1160
+        y: 80
       positionAbsolute:
-        x: 1040
-        y: -140
+        x: 1160
+        y: 80
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -892,11 +892,11 @@ workflow:
       height: 86
       id: assign_draft1
       position:
-        x: 1420
-        y: -140
+        x: 1500
+        y: 80
       positionAbsolute:
-        x: 1420
-        y: -140
+        x: 1500
+        y: 80
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -916,11 +916,11 @@ workflow:
       height: 120
       id: answer_outline
       position:
-        x: 1740
-        y: -140
+        x: 1840
+        y: 80
       positionAbsolute:
-        x: 1740
-        y: -140
+        x: 1840
+        y: 80
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -945,11 +945,11 @@ workflow:
       height: 86
       id: assign_revision
       position:
-        x: 1040
-        y: 40
+        x: 1160
+        y: 440
       positionAbsolute:
-        x: 1040
-        y: 40
+        x: 1160
+        y: 440
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1012,11 +1012,11 @@ workflow:
       height: 280
       id: outline_revise
       position:
-        x: 1420
-        y: 40
+        x: 1500
+        y: 440
       positionAbsolute:
-        x: 1420
-        y: 40
+        x: 1500
+        y: 440
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1041,11 +1041,11 @@ workflow:
       height: 86
       id: assign_draft2
       position:
-        x: 1800
-        y: 40
+        x: 1840
+        y: 440
       positionAbsolute:
-        x: 1800
-        y: 40
+        x: 1840
+        y: 440
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1067,11 +1067,11 @@ workflow:
       height: 120
       id: answer_revise
       position:
-        x: 2120
-        y: 40
+        x: 2180
+        y: 440
       positionAbsolute:
-        x: 2120
-        y: 40
+        x: 2180
+        y: 440
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1096,11 +1096,11 @@ workflow:
       height: 86
       id: assign_confirm
       position:
-        x: 1040
-        y: 220
+        x: 1160
+        y: 800
       positionAbsolute:
-        x: 1040
-        y: 220
+        x: 1160
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1176,11 +1176,11 @@ workflow:
       height: 300
       id: plan_gen
       position:
-        x: 1420
-        y: 220
+        x: 1500
+        y: 800
       positionAbsolute:
-        x: 1420
-        y: 220
+        x: 1500
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1205,11 +1205,11 @@ workflow:
       height: 86
       id: assign_plan
       position:
-        x: 1800
-        y: 220
+        x: 1840
+        y: 800
       positionAbsolute:
-        x: 1800
-        y: 220
+        x: 1840
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1235,11 +1235,11 @@ workflow:
       height: 220
       id: parse_plan
       position:
-        x: 2120
-        y: 220
+        x: 2180
+        y: 800
       positionAbsolute:
-        x: 2120
-        y: 220
+        x: 2180
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1267,11 +1267,11 @@ workflow:
       height: 178
       id: ep_loop
       position:
-        x: 2500
-        y: 220
+        x: 2560
+        y: 800
       positionAbsolute:
-        x: 2500
-        y: 220
+        x: 2560
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1292,8 +1292,8 @@ workflow:
         x: 24
         y: 68
       positionAbsolute:
-        x: 2524
-        y: 288
+        x: 2584
+        y: 868
       selectable: false
       sourcePosition: right
       targetPosition: left
@@ -1351,8 +1351,8 @@ workflow:
         x: 128
         y: 68
       positionAbsolute:
-        x: 2628
-        y: 288
+        x: 2688
+        y: 868
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1402,8 +1402,8 @@ workflow:
         x: 520
         y: 68
       positionAbsolute:
-        x: 3020
-        y: 288
+        x: 3080
+        y: 868
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1430,11 +1430,11 @@ workflow:
       height: 140
       id: join_scripts
       position:
-        x: 2960
-        y: 220
+        x: 3040
+        y: 800
       positionAbsolute:
-        x: 2960
-        y: 220
+        x: 3040
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1460,11 +1460,11 @@ workflow:
       height: 260
       id: video_pack
       position:
-        x: 3260
-        y: 220
+        x: 3420
+        y: 800
       positionAbsolute:
-        x: 3260
-        y: 220
+        x: 3420
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1564,11 +1564,11 @@ workflow:
       height: 300
       id: qa_gen
       position:
-        x: 3340
-        y: 220
+        x: 3820
+        y: 800
       positionAbsolute:
-        x: 3340
-        y: 220
+        x: 3820
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1620,11 +1620,11 @@ workflow:
       height: 220
       id: build_package
       position:
-        x: 3740
-        y: 220
+        x: 4240
+        y: 800
       positionAbsolute:
-        x: 3740
-        y: 220
+        x: 4240
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1640,11 +1640,11 @@ workflow:
       height: 80
       id: answer_final
       position:
-        x: 4400
-        y: 220
+        x: 5480
+        y: 800
       positionAbsolute:
-        x: 4400
-        y: 220
+        x: 5480
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1712,11 +1712,11 @@ workflow:
       height: 280
       id: rewrite_llm
       position:
-        x: 1040
-        y: 400
+        x: 1160
+        y: 2240
       positionAbsolute:
-        x: 1040
-        y: 400
+        x: 1160
+        y: 2240
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1734,11 +1734,11 @@ workflow:
       height: 100
       id: answer_rewrite
       position:
-        x: 1420
-        y: 400
+        x: 1560
+        y: 2240
       positionAbsolute:
-        x: 1420
-        y: 400
+        x: 1560
+        y: 2240
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1766,11 +1766,11 @@ workflow:
       height: 140
       id: answer_help
       position:
-        x: 1040
-        y: 560
+        x: 1160
+        y: 2600
       positionAbsolute:
-        x: 1040
-        y: 560
+        x: 1160
+        y: 2600
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1795,11 +1795,11 @@ workflow:
       height: 86
       id: assign_package
       position:
-        x: 4050
-        y: 220
+        x: 4640
+        y: 800
       positionAbsolute:
-        x: 4050
-        y: 220
+        x: 4640
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1831,11 +1831,11 @@ workflow:
       height: 240
       id: manga_prep
       position:
-        x: 3200
-        y: 700
+        x: 4240
+        y: 1160
       positionAbsolute:
-        x: 3200
-        y: 700
+        x: 4240
+        y: 1160
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1864,11 +1864,11 @@ workflow:
       height: 110
       id: manga_http
       position:
-        x: 3560
-        y: 700
+        x: 4640
+        y: 1160
       positionAbsolute:
-        x: 3560
-        y: 700
+        x: 4640
+        y: 1160
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1898,11 +1898,11 @@ workflow:
       height: 260
       id: manga_parse
       position:
-        x: 3920
-        y: 700
+        x: 5040
+        y: 1160
       positionAbsolute:
-        x: 3920
-        y: 700
+        x: 5040
+        y: 1160
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1918,11 +1918,11 @@ workflow:
       height: 80
       id: answer_manga
       position:
-        x: 4280
-        y: 700
+        x: 5480
+        y: 1160
       positionAbsolute:
-        x: 4280
-        y: 700
+        x: 5480
+        y: 1160
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1959,11 +1959,11 @@ workflow:
       height: 120
       id: manga_auto
       position:
-        x: 4320
-        y: 220
+        x: 5040
+        y: 800
       positionAbsolute:
-        x: 4320
-        y: 220
+        x: 5040
+        y: 800
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2012,11 +2012,11 @@ workflow:
       height: 300
       id: qa_revise
       position:
-        x: 4700
-        y: 700
+        x: 1160
+        y: 1520
       positionAbsolute:
-        x: 4700
-        y: 700
+        x: 1160
+        y: 1520
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2043,11 +2043,11 @@ workflow:
       height: 200
       id: qa_extract_outline
       position:
-        x: 5080
-        y: 700
+        x: 1560
+        y: 1520
       positionAbsolute:
-        x: 5080
-        y: 700
+        x: 1560
+        y: 1520
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2072,11 +2072,11 @@ workflow:
       height: 86
       id: qa_assign_outline
       position:
-        x: 5440
-        y: 700
+        x: 1960
+        y: 1520
       positionAbsolute:
-        x: 5440
-        y: 700
+        x: 1960
+        y: 1520
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2101,11 +2101,11 @@ workflow:
       height: 86
       id: qa_assign_package
       position:
-        x: 5760
-        y: 700
+        x: 2360
+        y: 1520
       positionAbsolute:
-        x: 5760
-        y: 700
+        x: 2360
+        y: 1520
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2121,11 +2121,11 @@ workflow:
       height: 80
       id: answer_qa_revise
       position:
-        x: 6080
-        y: 700
+        x: 2760
+        y: 1520
       positionAbsolute:
-        x: 6080
-        y: 700
+        x: 2760
+        y: 1520
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2174,11 +2174,11 @@ workflow:
       height: 300
       id: ep_script_llm
       position:
-        x: 4700
-        y: 1100
+        x: 1160
+        y: 1880
       positionAbsolute:
-        x: 4700
-        y: 1100
+        x: 1160
+        y: 1880
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2205,11 +2205,11 @@ workflow:
       height: 200
       id: ep_extract_outline
       position:
-        x: 5080
-        y: 1100
+        x: 1560
+        y: 1880
       positionAbsolute:
-        x: 5080
-        y: 1100
+        x: 1560
+        y: 1880
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2234,11 +2234,11 @@ workflow:
       height: 86
       id: ep_assign_outline
       position:
-        x: 5440
-        y: 1100
+        x: 1960
+        y: 1880
       positionAbsolute:
-        x: 5440
-        y: 1100
+        x: 1960
+        y: 1880
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2263,11 +2263,11 @@ workflow:
       height: 86
       id: ep_assign_package
       position:
-        x: 5760
-        y: 1100
+        x: 2360
+        y: 1880
       positionAbsolute:
-        x: 5760
-        y: 1100
+        x: 2360
+        y: 1880
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2283,18 +2283,18 @@ workflow:
       height: 80
       id: answer_ep_script
       position:
-        x: 6080
-        y: 1100
+        x: 2760
+        y: 1880
       positionAbsolute:
-        x: 6080
-        y: 1100
+        x: 2760
+        y: 1880
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 300
     viewport:
-      x: 0
-      y: 0
-      zoom: 0.5
+      x: 30
+      y: 60
+      zoom: 0.6
   rag_pipeline_variables: []
