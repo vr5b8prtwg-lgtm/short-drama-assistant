@@ -99,11 +99,17 @@ python -m jimeng.bridge.test_bridge --sessionid 你的sessionid --video
 ## 四、在 Dify 里配置
 
 1. 在 Dify 中导入工作流 **网剧自动生成**（`dify/网剧自动生成.yml`，已整合漫剧生成，不再需要单独的漫剧工作流）
-2. 到 Dify 的「环境变量」里新增：
-   - `JIMENG_SESSIONID` = 你的 sessionid
-   - `JIMENG_BRIDGE_URL` = `http://127.0.0.1:8000`（若 Dify 跑在 Docker 容器里，改成 `http://host.docker.internal:8000`）
-3. 运行工作流，输入剧本包文本，输出每场景的图片/视频 URL 清单
-4. 用 `python -m jimeng.assemble_manifest --manifest 清单.json` 下载 URL 并合成整集 MP4
+2. 在 Dify 的「开始」节点输入表单里填：
+   - **即梦 sessionid** = 你的 sessionid
+   - **编排服务地址** = `http://host.docker.internal:8100`（Docker 版 Dify；本机原生 Dify 用 `http://127.0.0.1:8100`）
+   - **剧本确认后自动生成漫剧** = 是（可选）
+3. 先启动本地两个服务（见上）：
+   - 桥接服务 8000（即梦网页版 API）
+   - 编排服务 `python -m jimeng.bridge.server --port 8100 --host 0.0.0.0`
+4. 运行工作流：创意 → 确认大纲 → 剧本包 → 漫剧素材清单（每场景图片/视频 URL + 对白）
+5. 用 `python -m jimeng.assemble_manifest --manifest 清单.json` 下载 URL 并合成整集 MP4
+
+> Docker 版 Dify 的 SSRF 代理放行配置见上文「方式 A」下方的警告框（必须做）。
 
 ## 常见问题
 

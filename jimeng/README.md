@@ -94,8 +94,10 @@ assets/
    python -m jimeng.bridge.generate --script 剧本包.md --sessionid <sessionid> --out manifest.json
    ```
 5. **Dify HTTP 节点自动化**：直接导入 `dify/网剧自动生成.yml`（已整合漫剧生成，无需单独导入），
-   输入表单填 sessionid / 编排服务地址 /「剧本确认后自动生成漫剧=是」，先启动本地编排服务
-   `python -m jimeng.bridge.server --port 8100` 与桥接服务，然后从头跑即可。
+   输入表单填 sessionid / 编排服务地址（Docker 版 Dify 用 http://host.docker.internal:8100，
+   本机原生用 http://127.0.0.1:8100；并在 Dify .env 放行内网，见 jimeng/bridge/README.md）/
+   「剧本确认后自动生成漫剧=是」，先启动本地编排服务
+   `python -m jimeng.bridge.server --port 8100 --host 0.0.0.0` 与桥接服务，然后从头跑即可。
 6. **合成整集**：`python -m jimeng.assemble_manifest --manifest manifest.json`
 
 > 非官方接口（自用研究性质），可能随官方调整失效；请勿商用。
