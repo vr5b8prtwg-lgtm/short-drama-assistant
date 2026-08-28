@@ -23,6 +23,20 @@ Dify 工作流（HTTP 请求节点）
 即梦官方（消耗你的积分）
 ```
 
+## 〇、本机实际部署（2026-08-28）
+
+Docker 镜像在本机拉取失败（镜像源损坏/不可达），已改用 **Node 源码方式**部署并运行：
+
+- 源码目录：`C:\Users\24620\jimeng-free-api-all`（克隆自 laixiao/jimeng-free-api-all）
+- 依赖：`npm install` 已完成；**已改用系统 Edge**（`chromium.launch({channel: "msedge"})`，
+  见 src/lib/browser-service.ts），无需下载 Chromium
+- 当前状态：服务已在后台运行，监听 `http://127.0.0.1:8000`（验证 `curl http://127.0.0.1:8000/ping` → pong）
+- 以后启动：运行项目里 `jimeng/bridge/start-bridge-node.ps1`（会自动检测端口）
+- 停止：`Stop-Process -Id <pid>` 或结束 node 进程；日志在 `C:\Users\24620\jimeng-free-api-all\bridge.out.log`
+
+> 若以后想换回 Docker：镜像 `wwwzhouhui569/jimeng-free-api-all:latest` 在本机网络下不可用，
+> 需先清理 daemon.json 里的镜像加速器（含占位符 your_preferred_mirror）再重试。
+
 ## 一、安装与启动桥接服务
 
 ### 方式 A：Docker（推荐，最简单）
