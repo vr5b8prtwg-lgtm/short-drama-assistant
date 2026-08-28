@@ -94,7 +94,8 @@ assets/
    python -m jimeng.bridge.generate --script 剧本包.md --sessionid <sessionid> --out manifest.json
    ```
    - 试跑最省积分：加 `--assets-only`，只生成「每人 1 张定妆图 + 1 张带剧名封面图」
-   - 场景图默认文生图 1 张/场景（`scene_mode=text`）；需要图生图带定妆参考（更一致但每场景 4 张）在 `config.yaml` 改 `bridge.scene_mode: reference`
+   - 完整模式默认最省积分：**每集只生成 1 张基准场景图**，该集所有场景的视频都从它生成（`scene_mode=episode_base`）
+   - 可选：`text`=每场景 1 张文生图；`reference`=图生图带定妆参考（更一致但每场景 4 张）
 5. **Dify HTTP 节点自动化**：直接导入 `dify/网剧自动生成.yml`（已整合漫剧生成，无需单独导入），
    输入表单填 sessionid / 编排服务地址（Docker 版 Dify 用 http://host.docker.internal:8100，
    本机原生用 http://127.0.0.1:8100；并在 Dify .env 放行内网，见 jimeng/bridge/README.md）/

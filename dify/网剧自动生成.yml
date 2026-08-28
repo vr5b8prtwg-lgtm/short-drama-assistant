@@ -1815,7 +1815,7 @@ workflow:
       type: custom
       width: 244
     - data:
-        code: "def main(script_package: str, session_id: str, asset_mode: str) -> dict:\n    import json\n    assets_only = \"仅素材\" in (asset_mode or \"\")\n    payload = {\n        \"session_id\": session_id,\n        \"script_package\": script_package,\n        \"base_url\": \"http://127.0.0.1:8000\",\n        \"skip_video\": assets_only,\n        \"skip_scenes\": assets_only,\n        \"scene_mode\": \"text\",\n        \"image_model\": \"jimeng-4.5\",\n        \"video_model\": \"jimeng-video-3.5-pro\",\n    }\n    return {\"payload\": json.dumps(payload, ensure_ascii=False)}\n"
+        code: "def main(script_package: str, session_id: str, asset_mode: str) -> dict:\n    import json\n    assets_only = \"仅素材\" in (asset_mode or \"\")\n    payload = {\n        \"session_id\": session_id,\n        \"script_package\": script_package,\n        \"base_url\": \"http://127.0.0.1:8000\",\n        \"skip_video\": assets_only,\n        \"skip_scenes\": assets_only,\n        \"scene_mode\": \"episode_base\",\n        \"image_model\": \"jimeng-4.5\",\n        \"video_model\": \"jimeng-video-3.5-pro\",\n    }\n    return {\"payload\": json.dumps(payload, ensure_ascii=False)}\n"
         code_language: python3
         desc: 组装编排服务请求体
         height: 240

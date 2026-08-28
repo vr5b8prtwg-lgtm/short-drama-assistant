@@ -90,11 +90,14 @@ def motion_prompt(cfg, scene):
         "{action}", scene.action or "")
 
 
-def generate_manifest(pkg, cfg, skip_video=False, skip_scenes=False, scene_mode="text"):
+def generate_manifest(pkg, cfg, skip_video=False, skip_scenes=False, scene_mode="episode_base"):
     """执行生成并返回 manifest dict。
 
-    skip_scenes=True 时只生成「定妆图 + 封面图」（试跑/素材模式，最省积分）；
-    scene_mode="text" 场景图用文生图 1 张（省积分）；"reference" 用图生图带定妆参考（更一致但每场景生成 4 张）。
+    skip_scenes=True 时只生成「定妆图 + 封面图」（试跑/素材模式，最省积分）。
+    scene_mode：
+      - "episode_base"（默认，最省积分）：每集只生成 1 张基准场景图，该集所有场景的视频都从这张图生成
+      - "text"：每场景 1 张文生图
+      - "reference"：每场景图生图带定妆参考（更一致但每场景生成 4 张）
     """
     jimeng_http.check_login(cfg)
     bridge = cfg.get("bridge") or {}
@@ -131,14 +134,29 @@ def generate_manifest(pkg, cfg, skip_video=False, skip_scenes=False, scene_mode=
 
     # 2) 逐场景生成
     episodes = []
+    ratio = bridge.get("ratio", "9:16")
+    resolution = bridge.get("resolution", "2k")
     for ep in pkg.episodes:
         scenes_out = []
+        # 每集基准场景图（episode_base：整集只生成 1 张，最省积分）
+        episode_base_image = None
+        if scene_mode == "episode_base" and ep.scenes:
+            base_scene = ep.scenes[0]
+            base_prompt = scene_prompt(cfg, base_scene, pkg.characters)
+            log.info("每集基准场景图：E%d（1 张）", ep.number)
+            episode_base_image = jimeng_http.text2image(
+                cfg, base_prompt, ratio=ratio, resolution_type=resolution)
+            log.info("基准场景图完成：%s", episode_base_image)
+
         for scene in ep.scenes:
             log.info("场景图（%s）：E%d S%d", scene_mode, ep.number, scene.index)
             img_prompt = scene_prompt(cfg, scene, pkg.characters)
-            ratio = bridge.get("ratio", "9:16")
-            resolution = bridge.get("resolution", "2k")
-            if scene_mode == "reference":
+            if scene_mode == "episode_base":
+                image_url = episode_base_image
+                if not image_url:
+                    image_url = jimeng_http.text2image(
+                        cfg, img_prompt, ratio=ratio, resolution_type=resolution)
+            elif scene_mode == "reference":
                 refs = [char_urls[c] for c in scene.characters if c in char_urls]
                 if refs:
                     try:

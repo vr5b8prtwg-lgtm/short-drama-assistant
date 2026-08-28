@@ -157,6 +157,27 @@ def test_assets_only_mode(tmp_path):
     assert manifest["episodes"] == []
     assert manifest["cover_url"] == "http://x/img.png"
 
+
+
+def test_episode_base_mode_saves_most(tmp_path):
+    pkg = load_package(FIXTURE)
+    cfg = make_cfg()
+    with patch.object(jimeng_http, "check_login", return_value={}), \
+         patch.object(jimeng_http, "text2image", return_value="http://x/base.png") as m_t2i, \
+         patch.object(jimeng_http, "image2image") as m_i2i, \
+         patch.object(jimeng_http, "image2video", return_value="http://x/v.mp4") as m_i2v:
+        manifest = gen.generate_manifest(pkg, cfg, scene_mode="episode_base")
+    # 2 定妆 + 1 封面 + 每集 1 张基准场景图（本样例 1 集）= 4 张文生图
+    assert m_t2i.call_count == 4
+    assert m_i2i.call_count == 0
+    assert m_i2v.call_count == 2          # 每场景 1 段视频
+    ep = manifest["episodes"][0]
+    # 该集两个场景共用同一张基准场景图
+    assert ep["scenes"][0]["image_url"] == "http://x/base.png"
+    assert ep["scenes"][1]["image_url"] == "http://x/base.png"
+    assert ep["scenes"][0]["video_url"] == "http://x/v.mp4"
+
+
 if __name__ == "__main__":
     import tempfile, traceback
     failed = 0

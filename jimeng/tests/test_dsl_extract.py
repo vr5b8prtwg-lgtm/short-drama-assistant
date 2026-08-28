@@ -88,7 +88,7 @@ def test_integrated_manga_prep():
     assert full["base_url"] == "http://127.0.0.1:8000"  # 桥接服务（宿主机）
     assert full["skip_video"] is False
     assert full["skip_scenes"] is False
-    assert full["scene_mode"] == "text"
+    assert full["scene_mode"] == "episode_base"
     assert full["video_model"] == "jimeng-video-3.5-pro"
     assert "剧本包" in full["script_package"]
     # 仅素材模式

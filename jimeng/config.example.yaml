@@ -19,8 +19,11 @@ bridge:
   base_url: "http://127.0.0.1:8000"
   # 即梦网页版 sessionid（浏览器 Cookie；也可用环境变量 JIMENG_SESSIONID）
   session_id: ""
-  # 场景图模式：text=文生图 1 张/场景（省积分，推荐）；reference=图生图带定妆参考（更一致但每场景生成 4 张）
-  scene_mode: "text"
+  # 场景图模式（最省积分优先）：
+  #   episode_base=每集 1 张基准场景图，该集所有场景视频都从它生成（推荐，最省）
+  #   text=每场景 1 张文生图
+  #   reference=每场景图生图带定妆参考（更一致但每场景生成 4 张，最费）
+  scene_mode: "episode_base"
   ratio: "9:16"
   resolution: "2k"
   video_resolution: "720p"
