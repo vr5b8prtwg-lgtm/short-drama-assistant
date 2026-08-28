@@ -505,11 +505,11 @@ workflow:
           required: false
           type: text-input
           variable: hot_elements
-        - label: 即梦 sessionid（生成漫剧用，可在 Cookie 获取）
-          max_length:
+        - label: 即梦 sessionid（生成漫剧用，浏览器 Cookie 获取）
+          max_length: 200
           options: []
           required: false
-          type: secret-input
+          type: text-input
           variable: session_id
         - default: http://127.0.0.1:8100
           label: 编排服务地址（漫剧用）
