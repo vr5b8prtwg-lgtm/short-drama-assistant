@@ -111,6 +111,44 @@ def test_bridge_parse_manifest():
     assert "林川" in out["manifest"]
 
 
+DSL_MAIN = Path(__file__).resolve().parents[2] / "dify" / "网剧自动生成.yml"
+
+
+def _main_code(node_id):
+    with open(DSL_MAIN, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    nodes = {n["id"]: n["data"] for n in data["workflow"]["graph"]["nodes"]}
+    return nodes[node_id]["code"]
+
+
+def test_integrated_manga_prep():
+    ns = _exec(_main_code("manga_prep"))
+    payload = ns["main"](
+        script_package="# 网剧剧本包\n## 一、大纲与人物设定",
+        session_id="sid2",
+        bridge_url="http://127.0.0.1:8100",
+    )["payload"]
+    import json
+    data = json.loads(payload)
+    assert data["session_id"] == "sid2"
+    assert data["base_url"] == "http://127.0.0.1:8100"
+    assert data["skip_video"] is False
+    assert "剧本包" in data["script_package"]
+
+
+def test_integrated_manga_parse():
+    ns = _exec(_main_code("manga_parse"))
+    out = ns["main"]({
+        "title": "整合剧",
+        "characters": {"林川": "u"},
+        "episodes": [{"number": 2, "title": "第二集",
+                      "scenes": [{"index": 1, "image_url": "http://x/i.png", "video_url": "http://x/v.mp4"}]}],
+    })
+    assert "第2集" in out["summary"]
+    assert "图片 i.png" in out["summary"]
+    assert "视频 v.mp4" in out["summary"]
+
+
 if __name__ == "__main__":
     import traceback
     failed = 0

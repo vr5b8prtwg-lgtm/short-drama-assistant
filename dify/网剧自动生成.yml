@@ -48,6 +48,14 @@ workflow:
     - revision_note
     value: ''
     value_type: string
+  - description: 已生成的完整剧本包（供生成漫剧使用）
+    id: 11111111-1111-4111-8111-111111111106
+    name: script_package
+    selector:
+    - conversation
+    - script_package
+    value: ''
+    value_type: string
   environment_variables: []
   features:
     file_upload: {}
@@ -290,18 +298,6 @@ workflow:
     - data:
         isInIteration: false
         isInLoop: false
-        sourceType: code
-        targetType: answer
-      id: build-package-answer-final
-      source: build_package
-      sourceHandle: source
-      target: answer_final
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
         sourceType: if-else
         targetType: llm
       id: route-rewrite-llm
@@ -359,6 +355,78 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: build-package-assign-package
+      source: build_package
+      sourceHandle: source
+      target: assign_package
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: assign-package-answer-final
+      source: assign_package
+      sourceHandle: source
+      target: answer_final
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: route-manga-manga-prep
+      source: route
+      sourceHandle: manga
+      target: manga_prep
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: manga-prep-manga-http
+      source: manga_prep
+      sourceHandle: source
+      target: manga_http
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: manga-http-manga-parse
+      source: manga_http
+      sourceHandle: source
+      target: manga_parse
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: manga-parse-answer-manga
+      source: manga_parse
+      sourceHandle: source
+      target: answer_manga
+      targetHandle: target
+      type: custom
+      zIndex: 0
     nodes:
     - data:
         desc: ''
@@ -413,6 +481,19 @@ workflow:
           required: false
           type: text-input
           variable: hot_elements
+        - label: 即梦 sessionid（生成漫剧用，可在 Cookie 获取）
+          max_length:
+          options: []
+          required: false
+          type: secret-input
+          variable: session_id
+        - default: http://127.0.0.1:8100
+          label: 编排服务地址（漫剧用）
+          max_length: 200
+          options: []
+          required: false
+          type: text-input
+          variable: bridge_url
       height: 200
       id: start
       position:
@@ -427,7 +508,7 @@ workflow:
       type: custom
       width: 244
     - data:
-        code: "import re\n\nCN_NUM = {\"一\": 1, \"二\": 2, \"两\": 2, \"三\": 3, \"四\": 4, \"五\": 5,\n          \"六\": 6, \"七\": 7, \"八\": 8, \"九\": 9}\n\n\ndef _cn_to_int(s: str) -> int:\n    if s.isdigit():\n        return int(s)\n    if s == \"十\":\n        return 10\n    total = 0\n    if s.startswith(\"十\"):\n        total = 10 + CN_NUM.get(s[1:], 0)\n        return total\n    if \"十\" in s:\n        left, _, right = s.partition(\"十\")\n        return CN_NUM.get(left, 0) * 10 + CN_NUM.get(right, 0)\n    return CN_NUM.get(s, 0)\n\n\ndef main(query: str, draft_outline: str, confirmed_outline: str) -> dict:\n    q = (query or \"\").strip()\n    confirm_kw = [\"确认\", \"可以\", \"开始\", \"继续\", \"没问题\", \"同意\", \"通过\", \"ok\", \"好的\", \"行\", \"就这样\"]\n    revise_kw = [\"修改\", \"调整\", \"不要\", \"不行\", \"换成\", \"改成\", \"改为\", \"重来\", \"重新\", \"再写\", \"换一个\", \"按这个改\"]\n    if not draft_outline and not confirmed_outline:\n        return {\"intent\": \"outline\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if confirmed_outline:\n        m = re.search(r\"第\\s*([0-9一二三四五六七八九十两]+)\\s*集\", q)\n        if m and any(k in q for k in [\"重写\", \"修改\", \"改\", \"换\"]):\n            return {\"intent\": \"rewrite_ep\", \"ep_number\": _cn_to_int(m.group(1)),\n                    \"rewrite_instruction\": q}\n        return {\"intent\": \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if any(k in q.lower() for k in confirm_kw):\n        return {\"intent\": \"confirm\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if any(k in q for k in revise_kw):\n        return {\"intent\": \"revise\", \"ep_number\": 0, \"rewrite_instruction\": q}\n    return {\"intent\": \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n"
+        code: "import re\n\nCN_NUM = {\"一\": 1, \"二\": 2, \"两\": 2, \"三\": 3, \"四\": 4, \"五\": 5,\n          \"六\": 6, \"七\": 7, \"八\": 8, \"九\": 9}\n\n\ndef _cn_to_int(s: str) -> int:\n    if s.isdigit():\n        return int(s)\n    if s == \"十\":\n        return 10\n    total = 0\n    if s.startswith(\"十\"):\n        total = 10 + CN_NUM.get(s[1:], 0)\n        return total\n    if \"十\" in s:\n        left, _, right = s.partition(\"十\")\n        return CN_NUM.get(left, 0) * 10 + CN_NUM.get(right, 0)\n    return CN_NUM.get(s, 0)\n\n\ndef main(query: str, draft_outline: str, confirmed_outline: str) -> dict:\n    q = (query or \"\").strip()\n    confirm_kw = [\"确认\", \"可以\", \"开始\", \"继续\", \"没问题\", \"同意\", \"通过\", \"ok\", \"好的\", \"行\", \"就这样\"]\n    revise_kw = [\"修改\", \"调整\", \"不要\", \"不行\", \"换成\", \"改成\", \"改为\", \"重来\", \"重新\", \"再写\", \"换一个\", \"按这个改\"]\n    if not draft_outline and not confirmed_outline:\n        return {\"intent\": \"outline\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    manga_kw = [\"漫剧\", \"出片\", \"生成视频\", \"生成素材\", \"做视频\", \"开始制作\", \"开始生成\", \"合成\", \"出片\"]\n    if confirmed_outline:\n        m = re.search(r\"第\\s*([0-9一二三四五六七八九十两]+)\\s*集\", q)\n        if m and any(k in q for k in [\"重写\", \"修改\", \"改\", \"换\"]):\n            return {\"intent\": \"rewrite_ep\", \"ep_number\": _cn_to_int(m.group(1)),\n                    \"rewrite_instruction\": q}\n        if any(k in q for k in manga_kw):\n            return {\"intent\": \"manga\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n        return {\"intent\": \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if any(k in q.lower() for k in confirm_kw):\n        return {\"intent\": \"confirm\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    if any(k in q for k in revise_kw):\n        return {\"intent\": \"revise\", \"ep_number\": 0, \"rewrite_instruction\": q}\n    return {\"intent\": \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n"
         code_language: python3
         desc: 根据会话状态与用户消息计算意图
         outputs:
@@ -528,6 +609,17 @@ workflow:
             - router
             - intent
           id: help
+          logical_operator: and
+        - case_id: manga
+          conditions:
+          - comparison_operator: is
+            id: cond-manga
+            value: manga
+            varType: string
+            variable_selector:
+            - router
+            - intent
+          id: manga
           logical_operator: and
         desc: 按意图分流
         selected: false
@@ -1479,7 +1571,9 @@ workflow:
 
           - 有大纲待确认时，回复「确认」继续生成分集剧本；回复修改意见可调整大纲。
 
-          - 剧本生成后，可回复「重写第 N 集 + 要求」单独重写某一集。'
+          - 剧本生成后，可回复「重写第 N 集 + 要求」单独重写某一集。
+
+          - 剧本生成后，回复「生成漫剧」可自动生成定妆图/场景图/视频素材清单（需在输入表单填好即梦 sessionid 与编排服务地址，并先启动本地编排服务）。'
         desc: ''
         selected: false
         title: 帮助
@@ -1498,6 +1592,163 @@ workflow:
       targetPosition: left
       type: custom
       width: 320
+    - data:
+        desc: 保存完整剧本包（供生成漫剧使用）
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - build_package
+          - package
+          variable_selector:
+          - conversation
+          - script_package
+          write_mode: over-write
+        selected: false
+        title: 保存剧本包
+        type: assigner
+        version: '2'
+      height: 86
+      id: assign_package
+      position:
+        x: 4050
+        y: 220
+      positionAbsolute:
+        x: 4050
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "def main(script_package: str, session_id: str, bridge_url: str) -> dict:\n    import json\n    payload = {\n        \"session_id\": session_id,\n        \"script_package\": script_package,\n        \"base_url\": bridge_url,\n        \"skip_video\": False,\n        \"image_model\": \"jimeng-4.5\",\n        \"video_model\": \"jimeng-video-seedance-2.0\",\n    }\n    return {\"payload\": json.dumps(payload, ensure_ascii=False)}\n"
+        code_language: python3
+        desc: 组装编排服务请求体
+        height: 240
+        outputs:
+          payload:
+            children:
+            type: string
+        selected: false
+        title: 漫剧请求
+        type: code
+        variables:
+        - value_selector:
+          - conversation
+          - script_package
+          value_type: string
+          variable: script_package
+        - value_selector:
+          - start
+          - session_id
+          value_type: string
+          variable: session_id
+        - value_selector:
+          - start
+          - bridge_url
+          value_type: string
+          variable: bridge_url
+      height: 240
+      id: manga_prep
+      position:
+        x: 3200
+        y: 700
+      positionAbsolute:
+        x: 3200
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        authorization:
+          config:
+          type: no-auth
+        body:
+          data: '{{#manga_prep.payload#}}'
+          type: raw-text
+        desc: 调用本地编排服务，自动生成定妆图/场景图/视频
+        headers: 'Content-Type: application/json'
+        method: post
+        params: ''
+        selected: false
+        timeout:
+          max_connect_timeout: 10
+          max_read_timeout: 1800
+          max_write_timeout: 30
+        title: 生成漫剧素材
+        type: http-request
+        url: '{{#start.bridge_url#}}/generate'
+        variables: []
+      height: 110
+      id: manga_http
+      position:
+        x: 3560
+        y: 700
+      positionAbsolute:
+        x: 3560
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        code: "def main(manifest: dict) -> dict:\n    import json\n    episodes = (manifest or {}).get(\"episodes\") or []\n    chars = (manifest or {}).get(\"characters\") or {}\n    lines = []\n    lines.append(\"剧名：%s\" % ((manifest or {}).get(\"title\") or \"\"))\n    lines.append(\"定妆图：%d 位角色\" % len(chars))\n    lines.append(\"集数：%d\" % len(episodes))\n    for ep in episodes:\n        scenes = ep.get(\"scenes\") or []\n        lines.append(\"第%d集「%s」：%d 个场景\" % (ep.get(\"number\", 0), ep.get(\"title\", \"\"), len(scenes)))\n        for sc in scenes:\n            img = (sc.get(\"image_url\") or \"\").split(\"/\")[-1]\n            vid = (sc.get(\"video_url\") or \"\").split(\"/\")[-1]\n            lines.append(\"  场景%d：图片 %s\" % (sc.get(\"index\", 0), img or sc.get(\"image_url\")))\n            if vid:\n                lines.append(\"          视频 %s\" % vid)\n    return {\"summary\": \"\\n\".join(lines), \"manifest\": json.dumps(manifest, ensure_ascii=False)}\n"
+        code_language: python3
+        desc: 解析素材清单并生成摘要
+        height: 260
+        outputs:
+          manifest:
+            children:
+            type: string
+          summary:
+            children:
+            type: string
+        selected: false
+        title: 解析素材清单
+        type: code
+        variables:
+        - value_selector:
+          - manga_http
+          - body
+          value_type: object
+          variable: manifest
+      height: 260
+      id: manga_parse
+      position:
+        x: 3920
+        y: 700
+      positionAbsolute:
+        x: 3920
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        answer: "## 漫剧素材清单\n\n{{#manga_parse.summary#}}\n\n## 清单 JSON（可复制保存为 manifest.json）\n\n{{#manga_parse.manifest#}}\n\n## 下一步（本地合成整集）\npython -m jimeng.assemble_manifest --manifest manifest.json"
+        desc: ''
+        selected: false
+        title: 输出漫剧清单
+        type: answer
+        variables: []
+      height: 80
+      id: answer_manga
+      position:
+        x: 4280
+        y: 700
+      positionAbsolute:
+        x: 4280
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
     viewport:
       x: 0
       y: 0
