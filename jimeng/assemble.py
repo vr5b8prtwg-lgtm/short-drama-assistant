@@ -4,7 +4,9 @@
 字幕时序由调用方（cli.py）按各场景片段实际时长计算偏移后合并为一条 SRT。
 """
 import logging
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 from .config import resolve_path
@@ -31,6 +33,7 @@ def probe_duration(cfg, media_path, timeout=30):
             [_ffprobe(cfg), "-v", "error", "-show_entries", "format=duration",
              "-of", "default=noprint_wrappers=1:nokey=1", str(media_path)],
             capture_output=True, text=True, timeout=timeout,
+            cwd=os.environ.get("TEMP") or tempfile.gettempdir(),
             encoding="utf-8", errors="replace",
         )
         if proc.returncode == 0 and proc.stdout.strip():
@@ -42,9 +45,11 @@ def probe_duration(cfg, media_path, timeout=30):
 
 def _run(cmd, timeout=1800):
     log.debug("ffmpeg: %s", " ".join(cmd))
+    # 从系统临时目录启动：避免从 OneDrive 等受限路径启动 ffmpeg 被拒绝
+    cwd = os.environ.get("TEMP") or tempfile.gettempdir()
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
-                              encoding="utf-8", errors="replace")
+                              cwd=cwd, encoding="utf-8", errors="replace")
     except FileNotFoundError:
         raise AssembleError("未找到 ffmpeg，请先安装并加入 PATH，或在 config.yaml 的 assemble.ffmpeg_bin 配置完整路径。")
     except subprocess.TimeoutExpired:

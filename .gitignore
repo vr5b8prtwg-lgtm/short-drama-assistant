@@ -20,3 +20,6 @@ Thumbs.db
 
 # Dify 导入过程中的临时文件
 tmp/
+
+# AI 漫剧生成产物
+assets/

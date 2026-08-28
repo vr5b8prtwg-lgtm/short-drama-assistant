@@ -29,9 +29,11 @@ Docker 镜像在本机拉取失败（镜像源损坏/不可达），已改用 **
 
 - 源码目录：`C:\Users\24620\jimeng-free-api-all`（克隆自 laixiao/jimeng-free-api-all）
 - 依赖：`npm install` 已完成；**已改用系统 Edge**（`chromium.launch({channel: "msedge"})`，
-  见 src/lib/browser-service.ts），无需下载 Chromium
+  并把启动参数改为 Windows 兼容集，见 src/lib/browser-service.ts），无需下载 Chromium
 - 当前状态：服务已在后台运行，监听 `http://127.0.0.1:8000`（验证 `curl http://127.0.0.1:8000/ping` → pong）
 - 以后启动：运行项目里 `jimeng/bridge/start-bridge-node.ps1`（会自动检测端口）
+- ffmpeg：已用 `winget install Gyan.FFmpeg` 安装（完整版含 libx264），路径见 `jimeng/config.yaml` 的 `assemble.ffmpeg_bin`；合成脚本会从系统临时目录启动 ffmpeg（OneDrive 路径下直接启动会被拒绝）
+- **Seedance 2.0 视频需先在即梦网页端完成一次「安全确认」**（首次使用会返回「需要安全确认，请刷新页面重试」）；未确认前可用 `jimeng-video-3.5-pro` 等普通模型，已实测可用
 - 停止：`Stop-Process -Id <pid>` 或结束 node 进程；日志在 `C:\Users\24620\jimeng-free-api-all\bridge.out.log`
 
 > 若以后想换回 Docker：镜像 `wwwzhouhui569/jimeng-free-api-all:latest` 在本机网络下不可用，

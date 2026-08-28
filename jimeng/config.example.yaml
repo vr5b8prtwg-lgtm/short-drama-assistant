@@ -33,6 +33,7 @@ video:
   duration: 5
   video_resolution: "1080p"
   # 有即梦订阅（VIP）时官方默认 seedance2.0_vip 支持 1080p；非 VIP 请改为 seedance2.0 + 720p
+  # 注意：Seedance 首次使用需先在即梦网页端完成「安全确认」，否则报「需要安全确认」
   model_version: "seedance2.0_vip"
   # 图生视频的运动/运镜提示词（可含 {action} 占位符，替换为场景动作）
   motion_prompt: "镜头缓慢推近，人物自然动作，电影感运镜，画面稳定"
