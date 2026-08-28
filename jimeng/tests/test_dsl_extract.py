@@ -104,6 +104,41 @@ def test_integrated_manga_parse():
     assert "视频 v.mp4" in out["summary"]
 
 
+def _main_router():
+    with open(DSL_MAIN, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    nodes = {n["id"]: n["data"] for n in data["workflow"]["graph"]["nodes"]}
+    ns = {}
+    exec(nodes["router"]["code"], ns)
+    return ns["main"]
+
+
+def test_integrated_router_new_intents():
+    main = _main_router()
+    pkg_qa = "# 网剧剧本包\n## 一、大纲与人物设定\n人物卡\n## 五、质检报告\n问题"
+    assert main("单集：外卖小哥救人", "", "", "")["intent"] == "ep_script"
+    assert main("落魄赘婿逆袭", "", "", "")["intent"] == "outline"
+    assert main("确认", "draft", "", "")["intent"] == "confirm"
+    assert main("男主太弱了", "draft", "", "")["intent"] == "revise"
+    assert main("根据质检报告修改", "", "confirmed", pkg_qa)["intent"] == "qa_revise"
+    assert main("生成漫剧", "", "confirmed", pkg_qa)["intent"] == "manga"
+    assert main("重写第3集", "", "confirmed", pkg_qa)["intent"] == "rewrite_ep"
+    assert main("生成漫剧", "", "", pkg_qa)["intent"] == "manga"  # 单集后仅 script_package
+
+
+def test_integrated_extract_outline():
+    with open(DSL_MAIN, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    nodes = {n["id"]: n["data"] for n in data["workflow"]["graph"]["nodes"]}
+    ns = {}
+    exec(nodes["qa_extract_outline"]["code"], ns)
+    sample = "## 一、大纲与人物设定\n剧名：X\n人物卡\n## 人物定妆表\n- **林川**：desc\n## 二、分集规划"
+    outline = ns["main"](sample)["outline"]
+    assert outline.startswith("## 一、大纲与人物设定")
+    assert "剧名：X" in outline
+    assert "人物定妆表" not in outline
+
+
 if __name__ == "__main__":
     import traceback
     failed = 0

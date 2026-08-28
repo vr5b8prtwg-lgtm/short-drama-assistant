@@ -451,6 +451,126 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: route-qa-revise
+      source: route
+      sourceHandle: qa_revise
+      target: qa_revise
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: qa_revise-qa_extract_outline
+      source: qa_revise
+      sourceHandle: source
+      target: qa_extract_outline
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: qa_extract_outline-qa_assign_outline
+      source: qa_extract_outline
+      sourceHandle: source
+      target: qa_assign_outline
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: assigner
+      id: qa_assign_outline-qa_assign_package
+      source: qa_assign_outline
+      sourceHandle: source
+      target: qa_assign_package
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: qa_assign_package-answer_qa_revise
+      source: qa_assign_package
+      sourceHandle: source
+      target: answer_qa_revise
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: route-ep-script
+      source: route
+      sourceHandle: ep_script
+      target: ep_script_llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: ep_script_llm-ep_extract_outline
+      source: ep_script_llm
+      sourceHandle: source
+      target: ep_extract_outline
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: ep_extract_outline-ep_assign_outline
+      source: ep_extract_outline
+      sourceHandle: source
+      target: ep_assign_outline
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: assigner
+      id: ep_assign_outline-ep_assign_package
+      source: ep_assign_outline
+      sourceHandle: source
+      target: ep_assign_package
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: ep_assign_package-answer_ep_script
+      source: ep_assign_package
+      sourceHandle: source
+      target: answer_ep_script
+      targetHandle: target
+      type: custom
+      zIndex: 0
     nodes:
     - data:
         desc: ''
@@ -541,7 +661,7 @@ workflow:
       type: custom
       width: 244
     - data:
-        code: "import re\n\nCN_NUM = {\"一\": 1, \"二\": 2, \"两\": 2, \"三\": 3, \"四\": 4, \"五\": 5,\n          \"六\": 6, \"七\": 7, \"八\": 8, \"九\": 9}\n\n\ndef _cn_to_int(s: str) -> int:\n    if s.isdigit():\n        return int(s)\n    if s == \"十\":\n        return 10\n    total = 0\n    if s.startswith(\"十\"):\n        total = 10 + CN_NUM.get(s[1:], 0)\n        return total\n    if \"十\" in s:\n        left, _, right = s.partition(\"十\")\n        return CN_NUM.get(left, 0) * 10 + CN_NUM.get(right, 0)\n    return CN_NUM.get(s, 0)\n\n\ndef main(query: str, draft_outline: str, confirmed_outline: str) -> dict:\n    q = (query or \"\").strip()\n    confirm_kw = [\"确认\", \"可以\", \"开始\", \"继续\", \"没问题\", \"同意\", \"通过\", \"ok\", \"好的\", \"行\", \"就这样\"]\n    if not draft_outline and not confirmed_outline:\n        return {\"intent\": \"outline\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    manga_kw = [\"漫剧\", \"出片\", \"生成视频\", \"生成素材\", \"做视频\", \"开始制作\", \"开始生成\", \"合成\", \"出片\"]\n    if confirmed_outline:\n        m = re.search(r\"第\\s*([0-9一二三四五六七八九十两]+)\\s*集\", q)\n        if m and any(k in q for k in [\"重写\", \"修改\", \"改\", \"换\"]):\n            return {\"intent\": \"rewrite_ep\", \"ep_number\": _cn_to_int(m.group(1)),\n                    \"rewrite_instruction\": q}\n        if any(k in q for k in manga_kw):\n            return {\"intent\": \"manga\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n        return {\"intent\": \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    # 有大纲草稿待确认：回复「确认」继续；其他消息一律视为修改意见\n    if any(k in q.lower() for k in confirm_kw):\n        return {\"intent\": \"confirm\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    return {\"intent\": \"revise\", \"ep_number\": 0, \"rewrite_instruction\": q}\n"
+        code: "import re\n\nCN_NUM = {\"一\": 1, \"二\": 2, \"两\": 2, \"三\": 3, \"四\": 4, \"五\": 5,\n          \"六\": 6, \"七\": 7, \"八\": 8, \"九\": 9}\n\n\ndef _cn_to_int(s: str) -> int:\n    if s.isdigit():\n        return int(s)\n    if s == \"十\":\n        return 10\n    total = 0\n    if s.startswith(\"十\"):\n        total = 10 + CN_NUM.get(s[1:], 0)\n        return total\n    if \"十\" in s:\n        left, _, right = s.partition(\"十\")\n        return CN_NUM.get(left, 0) * 10 + CN_NUM.get(right, 0)\n    return CN_NUM.get(s, 0)\n\n\ndef main(query: str, draft_outline: str, confirmed_outline: str, script_package: str) -> dict:\n    q = (query or \"\").strip()\n    confirm_kw = [\"确认\", \"可以\", \"开始\", \"继续\", \"没问题\", \"同意\", \"通过\", \"ok\", \"好的\", \"行\", \"就这样\"]\n    qa_kw = [\"质检\", \"按报告\", \"根据报告\", \"按修改建议\", \"按检查意见\"]\n    if \"单集\" in q:\n        return {\"intent\": \"ep_script\", \"ep_number\": 0, \"rewrite_instruction\": q}\n    if not draft_outline and not confirmed_outline and not script_package:\n        return {\"intent\": \"outline\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    manga_kw = [\"漫剧\", \"出片\", \"生成视频\", \"生成素材\", \"做视频\", \"开始制作\", \"开始生成\", \"合成\", \"出片\"]\n    if confirmed_outline or script_package:\n        m = re.search(r\"第\\s*([0-9一二三四五六七八九十两]+)\\s*集\", q)\n        if confirmed_outline and m and any(k in q for k in [\"重写\", \"修改\", \"改\", \"换\"]):\n            return {\"intent\": \"rewrite_ep\", \"ep_number\": _cn_to_int(m.group(1)),\n                    \"rewrite_instruction\": q}\n        if any(k in q for k in qa_kw) and \"质检报告\" in (script_package or \"\"):\n            return {\"intent\": \"qa_revise\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n        if any(k in q for k in manga_kw):\n            return {\"intent\": \"manga\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n        return {\"intent\": \"help\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    # 有大纲草稿待确认：回复「确认」继续；其他消息一律视为修改意见\n    if any(k in q.lower() for k in confirm_kw):\n        return {\"intent\": \"confirm\", \"ep_number\": 0, \"rewrite_instruction\": \"\"}\n    return {\"intent\": \"revise\", \"ep_number\": 0, \"rewrite_instruction\": q}\n"
         code_language: python3
         desc: 根据会话状态与用户消息计算意图
         outputs:
@@ -573,6 +693,11 @@ workflow:
           - confirmed_outline
           value_type: string
           variable: confirmed_outline
+        - value_selector:
+          - conversation
+          - script_package
+          value_type: string
+          variable: script_package
       height: 300
       id: router
       position:
@@ -653,6 +778,28 @@ workflow:
             - router
             - intent
           id: manga
+          logical_operator: and
+        - case_id: qa_revise
+          conditions:
+          - comparison_operator: is
+            id: cond-qa-revise
+            value: qa_revise
+            varType: string
+            variable_selector:
+            - router
+            - intent
+          id: qa_revise
+          logical_operator: and
+        - case_id: ep_script
+          conditions:
+          - comparison_operator: is
+            id: cond-ep-script
+            value: ep_script
+            varType: string
+            variable_selector:
+            - router
+            - intent
+          id: ep_script
           logical_operator: and
         desc: 按意图分流
         selected: false
@@ -1606,7 +1753,11 @@ workflow:
 
           - 剧本生成后，可回复「重写第 N 集 + 要求」单独重写某一集。
 
-          - 剧本生成后，回复「生成漫剧」可自动生成定妆图/场景图/视频素材清单（需在输入表单填好即梦 sessionid 与编排服务地址，并先启动本地编排服务）。'
+          - 剧本生成后，回复「生成漫剧」可自动生成定妆图/场景图/视频素材清单（需在输入表单填好即梦 sessionid 与编排服务地址，并先启动本地编排服务）。
+
+          - 剧本生成后，回复「根据质检报告修改」可依据质检报告修订大纲与剧本。
+
+          - 任意时候回复「单集：剧情描述」，可把单集剧情直接整理成规范剧本并生成漫剧。'
         desc: ''
         selected: false
         title: 帮助
@@ -1823,6 +1974,330 @@ workflow:
       targetPosition: left
       type: custom
       width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 根据质检报告修订大纲与全部剧本
+        memory:
+          query_prompt_template: "{{#sys.query#}}\n{{#sys.files#}}"
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            max_tokens: 12000
+            temperature: 0.3
+          mode: chat
+          name: qwen-turbo
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - role: system
+          text: 你是资深剧本审稿人兼总编剧。根据质检报告修订剧本包，保持人物、定妆描述与剧情连贯。
+        - role: user
+          text: "完整剧本包（含质检报告）：\n{{#conversation.script_package#}}\n\n请根据「五、质检报告」中的问题清单与修改建议，修订大纲、人物设定与全部剧本（尤其是需修订的集数），并给出更新后的质检说明。要求：保留剧本包五部分结构（一、大纲与人物设定/二、分集规划/三、分集剧本/四、文生视频提示词包/五、质检报告）；每个场景的「画面提示词（文生视频）」仍须原样包含出场角色定妆描述；只输出修订后的完整剧本包。"
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: true
+        structured_output:
+          enabled: false
+        title: 按质检修订
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 300
+      id: qa_revise
+      position:
+        x: 4700
+        y: 700
+      positionAbsolute:
+        x: 4700
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    - data:
+        code: "def main(package: str) -> dict:\n    text = package or \"\"\n    lines = text.splitlines()\n    out = []\n    grab = False\n    for line in lines:\n        if line.startswith(\"## 一、大纲与人物设定\"):\n            grab = True\n        elif line.startswith(\"## \") and grab:\n            break\n        if grab:\n            out.append(line)\n    if not out:\n        out = lines\n    return {\"outline\": \"\\n\".join(out).strip()}\n"
+        code_language: python3
+        desc: 从修订后剧本包提取大纲与人物
+        height: 200
+        outputs:
+          outline:
+            children:
+            type: string
+        selected: false
+        title: 提取修订大纲
+        type: code
+        variables:
+        - value_selector:
+          - qa_revise
+          - text
+          value_type: string
+          variable: package
+      height: 200
+      id: qa_extract_outline
+      position:
+        x: 5080
+        y: 700
+      positionAbsolute:
+        x: 5080
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - qa_extract_outline
+          - outline
+          variable_selector:
+          - conversation
+          - confirmed_outline
+          write_mode: over-write
+        selected: false
+        title: 更新已确认大纲
+        type: assigner
+        version: '2'
+      height: 86
+      id: qa_assign_outline
+      position:
+        x: 5440
+        y: 700
+      positionAbsolute:
+        x: 5440
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - qa_revise
+          - text
+          variable_selector:
+          - conversation
+          - script_package
+          write_mode: over-write
+        selected: false
+        title: 更新剧本包
+        type: assigner
+        version: '2'
+      height: 86
+      id: qa_assign_package
+      position:
+        x: 5760
+        y: 700
+      positionAbsolute:
+        x: 5760
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: "## 修订后的剧本包（已按质检报告修订）\n\n{{#qa_revise.text#}}\n\n回复「生成漫剧」可基于修订后的剧本重新生成漫剧素材。"
+        desc: ''
+        selected: false
+        title: 输出修订剧本包
+        type: answer
+        variables: []
+      height: 80
+      id: answer_qa_revise
+      position:
+        x: 6080
+        y: 700
+      positionAbsolute:
+        x: 6080
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 把用户提供的单集剧情整理成规范单集剧本包
+        memory:
+          query_prompt_template: "{{#sys.query#}}\n{{#sys.files#}}"
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            max_tokens: 8000
+            temperature: 0.5
+          mode: chat
+          name: qwen-turbo
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - role: system
+          text: 你是金牌短剧编剧。把用户提供的单集剧情整理成规范的竖屏短剧单集剧本包。
+        - role: user
+          text: "用户提供的单集剧情：\n{{#sys.query#}}\n\n请整理为规范的单集剧本包（Markdown）：\n# 单集剧本包\n## 一、大纲与人物设定\n剧名/一句话卖点/人物卡；每个角色含 **定妆描述**（可直接用于 2D 国漫/日漫风格绘制的固定外观锚点：性别年龄/脸型五官/发型发色/体型/服装配色/标志性配饰/气质）\n## 人物定妆表（全剧固定外观锚点）\n- **角色名**：定妆描述\n## 三、分集剧本\n## 第1集：标题\n### 场景 1\n- 场景地点/时间：…\n- 人物：…\n- 剧情与动作：…\n- 对白：\n  - 角色：台词\n- 情绪：…\n- 画面提示词（文生视频）：镜头/景别 + 画面描述 + 风格；必须原样包含出场角色的定妆描述\n（场景 2、3……共 3-6 个场景）\n### 本集结尾钩子\n### 本集摘要\n\n要求：竖屏 9:16 短剧、节奏快、台词口语化；只输出剧本包正文。"
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: true
+        structured_output:
+          enabled: false
+        title: 单集剧本整理
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 300
+      id: ep_script_llm
+      position:
+        x: 4700
+        y: 1100
+      positionAbsolute:
+        x: 4700
+        y: 1100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 320
+    - data:
+        code: "def main(package: str) -> dict:\n    text = package or \"\"\n    lines = text.splitlines()\n    out = []\n    grab = False\n    for line in lines:\n        if line.startswith(\"## 一、大纲与人物设定\"):\n            grab = True\n        elif line.startswith(\"## \") and grab:\n            break\n        if grab:\n            out.append(line)\n    if not out:\n        out = lines\n    return {\"outline\": \"\\n\".join(out).strip()}\n"
+        code_language: python3
+        desc: 从单集剧本包提取大纲与人物
+        height: 200
+        outputs:
+          outline:
+            children:
+            type: string
+        selected: false
+        title: 提取单集大纲
+        type: code
+        variables:
+        - value_selector:
+          - ep_script_llm
+          - text
+          value_type: string
+          variable: package
+      height: 200
+      id: ep_extract_outline
+      position:
+        x: 5080
+        y: 1100
+      positionAbsolute:
+        x: 5080
+        y: 1100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - ep_extract_outline
+          - outline
+          variable_selector:
+          - conversation
+          - confirmed_outline
+          write_mode: over-write
+        selected: false
+        title: 保存单集大纲
+        type: assigner
+        version: '2'
+      height: 86
+      id: ep_assign_outline
+      position:
+        x: 5440
+        y: 1100
+      positionAbsolute:
+        x: 5440
+        y: 1100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - ep_script_llm
+          - text
+          variable_selector:
+          - conversation
+          - script_package
+          write_mode: over-write
+        selected: false
+        title: 保存单集剧本
+        type: assigner
+        version: '2'
+      height: 86
+      id: ep_assign_package
+      position:
+        x: 5760
+        y: 1100
+      positionAbsolute:
+        x: 5760
+        y: 1100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: "## 单集剧本包（已整理为规范剧本）\n\n{{#ep_script_llm.text#}}\n\n回复「生成漫剧」即可基于该单集生成定妆图/场景图/视频素材。"
+        desc: ''
+        selected: false
+        title: 输出单集剧本
+        type: answer
+        variables: []
+      height: 80
+      id: answer_ep_script
+      position:
+        x: 6080
+        y: 1100
+      positionAbsolute:
+        x: 6080
+        y: 1100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 300
     viewport:
       x: 0
       y: 0
